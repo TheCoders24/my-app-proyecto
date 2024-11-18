@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from 'react';
 
-export default function landing() {
+
+
+export default function Landing() {
     const [serverTime, setServerTime] = useState(null);
 
     useEffect(() => {
@@ -20,12 +22,12 @@ export default function landing() {
 
     return (
         <div>
-            <h1>Hora del servidor</h1>
-            {serverTime ? (
-                <p>{serverTime.now}</p>
-            ) : (
-                <p>Cargando...</p>
-            )}
-        </div>
+        <h1>Hora del servidor</h1>
+        {serverTime ? (
+            <p>{new Date(serverTime).toLocaleString()}</p>
+        ) : (
+            <p>Cargando...</p>
+        )}
+    </div>
     );
 }
