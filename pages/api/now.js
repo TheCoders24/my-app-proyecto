@@ -12,7 +12,9 @@ export default async function handler(req, res) {
         
         // Devuelve la hora del servidor en el formato esperado
         res.status(200).json({ serverTime: result.rows[0].now }); // Asegúrate de acceder a la propiedad correcta
-    } catch (error) {
+    } 
+    catch (error) 
+    {
         console.error('Error al obtener hora del servidor:', error);
         res.status(500).json({ error: 'Error al conectarse a PostgreSQL' });
     }
