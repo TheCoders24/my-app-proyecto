@@ -9,6 +9,8 @@ const LoginPage = () => {
     console.log("Username:", username);
     console.log("Password:", password);
     // Aquí puedes agregar lógica para autenticar al usuario
+    alert("Username:", username);
+    alert("Password:", password);
   };
 
   return (
