@@ -1,16 +1,45 @@
 "use client";
 
-const LoginPage = () => {
-  const handleSubmit = (event) => {
+const LoginPage =  ()  => {
+  const handleSubmit = async (event) => {
     event.preventDefault(); // Evitar que el formulario se recargue
     const username = event.target.username.value;
     const password = event.target.password.value;
 
     console.log("Username:", username);
     console.log("Password:", password);
-    // Aquí puedes agregar lógica para autenticar al usuario
-    alert("Username:", username);
-    alert("Password:", password);
+    try {
+      const response = await fetch('api/login', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password }),
+      });
+      
+      const data = await response.text();
+      console.log("Data:", data);
+      if(!response.ok) {
+        console.error("Error al enviar la petición:", data);
+        alert("Error al enviar la petición");
+        return;
+      }
+      const datas = JSON.parse(data);
+      console.log("Datos:", datas);
+      if (datas.success) {
+          console.log("Login successful");
+          alert(data.message);
+          // Redireccionar al usuario a la página de inicio
+          window.location.href = '/';
+      } else {
+          console.log("Login failed");
+          alert(data.message);
+      }
+    } 
+    catch (error) 
+    {
+      console.error("Error al enviar la petición:", error);
+    }
   };
 
   return (
