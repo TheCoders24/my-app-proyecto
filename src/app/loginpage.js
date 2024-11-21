@@ -2,61 +2,61 @@
 
 import { useState } from "react";
 
-const LoginPage =  ()  => {
-  const [errorMessage, setErrorMessage] = useState(false);
-  const [loading, setLoading] = useState("")
+const LoginPage = () => {
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (event) => {
     event.preventDefault(); // Evitar que el formulario se recargue
     setLoading(true);
     setErrorMessage("");
-   
+
     const username = event.target.username.value.trim();
     const password = event.target.password.value.trim();
+
     console.log("Username:", username);
     console.log("Password:", password);
 
-    if(!username || !password){
+    if (!username || !password) {
       setErrorMessage("Por favor, ingrese ambos campos");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ 
-            username,
-            password
-          }),
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
       });
 
       const data = await response.json();
       console.log("Data:", data);
-      if(!response.ok) {
-        console.error("Error al enviar la petición:", data);
-        alert("Error al enviar la petición");
+
+      if (!response.ok) {
+        console.error("Error en la respuesta:", data);
+        setErrorMessage(data.message || "Error al enviar la petición");
         return;
       }
-     
-      if (datas.success) {
-          console.log("Login successful");
-          alert(data.message);
-          // Redireccionar al usuario a la página de inicio
-          
-      } 
-      else 
-      {
-          console.log("Login failed");
-          alert(data.message);
+
+      if (data.success) {
+        console.log("Login exitoso");
+        alert("Bienvenido: " + data.message);
+        // Redirigir al usuario a la página de inicio
+        window.location.href = "/";
+      } else {
+        console.log("Fallo en el inicio de sesión");
+        setErrorMessage(data.message || "Credenciales incorrectas");
       }
-    } 
-    catch (error) 
-    {
-      console.error("Error al enviar la petición:", error);
-    }finally{
+    } catch (error) {
+      console.error("Error en la petición:", error);
+      setErrorMessage("Ocurrió un error inesperado. Por favor, inténtelo de nuevo.");
+    } finally {
       setLoading(false);
     }
   };
@@ -68,11 +68,14 @@ const LoginPage =  ()  => {
         onSubmit={handleSubmit}
       >
         <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+        {errorMessage && (
+          <div className="text-red-500 text-sm mb-4">{errorMessage}</div>
+        )}
         <label
           htmlFor="username"
           className="block text-gray-700 font-medium mb-2"
         >
-          Username: 
+          Username:
         </label>
         <input
           type="text"
@@ -96,9 +99,12 @@ const LoginPage =  ()  => {
         />
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600 transition"
+          className={`w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600 transition ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={loading}
         >
-          Login
+          {loading ? "Cargando..." : "Login"}
         </button>
       </form>
     </div>
