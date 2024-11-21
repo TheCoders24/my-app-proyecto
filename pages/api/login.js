@@ -1,24 +1,33 @@
-// pages/api/login.js
-import { NextResponse } from "next/server";
-import { query } from './../../lib/db'; // Asegúrate de que la ruta sea correcta
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt'; // Asegúrate de que bcrypt esté instalado
+import { query } from '../../lib/db'; // Importa tu función para consultas a la base de datos
 
-export async function POST(request) {
-    const { username, password } = await request.json();
+export default async function handler(req, res) {
+    if (req.method === 'POST') {
+        try {
+            const { username, password } = req.body;
 
-    try {
-        // Aquí utilizamos la función query para realizar la consulta
-        const result = await query('SELECT * FROM users WHERE username = $1', [username]);
-        const user = result.rows[0];
+            // Consulta para obtener los datos del usuario
+            const result = await query('SELECT * FROM users WHERE username = $1', [username]);
+            const user = result.rows[0];
 
-        if (user && await bcrypt.compare(password, user.password)) {
-            return NextResponse.json({ success: true, message: 'Login successful' }, { status: 200 });
+            if (!user) {
+                return res.status(401).json({ success: false, message: 'Invalid username or password' });
+            }
+
+            // Verifica la contraseña
+            const isValidPassword = await bcrypt.compare(password, user.password);
+
+            if (!isValidPassword) {
+                return res.status(401).json({ success: false, message: 'Invalid username or password' });
+            }
+
+            // Login exitoso
+            return res.status(200).json({ success: true, message: 'Login successful' });
+        } catch (error) {
+            console.error('Error during login:', error);
+            return res.status(500).json({ success: false, message: 'Internal server error' });
         }
-
-        return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 });
-        
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
+    } else {
+        return res.status(405).json({ success: false, message: 'Method not allowed' });
     }
 }

@@ -1,37 +1,54 @@
 "use client";
 
+import { useState } from "react";
+
 const LoginPage =  ()  => {
+  const [errorMessage, setErrorMessage] = useState(false);
+  const [loading, setLoading] = useState("")
   const handleSubmit = async (event) => {
     event.preventDefault(); // Evitar que el formulario se recargue
-    const username = event.target.username.value;
-    const password = event.target.password.value;
-
+    setLoading(true);
+    setErrorMessage("");
+   
+    const username = event.target.username.value.trim();
+    const password = event.target.password.value.trim();
     console.log("Username:", username);
     console.log("Password:", password);
+
+    if(!username || !password){
+      setErrorMessage("Por favor, ingrese ambos campos");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch('api/login', {
+      const response = await fetch('/api/login', {
           method: 'POST',
           headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ 
+            username,
+            password
+          }),
       });
-      
-      const data = await response.text();
+
+      const data = await response.json();
       console.log("Data:", data);
       if(!response.ok) {
         console.error("Error al enviar la petición:", data);
         alert("Error al enviar la petición");
         return;
       }
-      const datas = JSON.parse(data);
-      console.log("Datos:", datas);
+     
       if (datas.success) {
           console.log("Login successful");
           alert(data.message);
           // Redireccionar al usuario a la página de inicio
-          window.location.href = '/';
-      } else {
+          
+      } 
+      else 
+      {
           console.log("Login failed");
           alert(data.message);
       }
@@ -39,6 +56,8 @@ const LoginPage =  ()  => {
     catch (error) 
     {
       console.error("Error al enviar la petición:", error);
+    }finally{
+      setLoading(false);
     }
   };
 
