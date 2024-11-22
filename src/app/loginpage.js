@@ -48,7 +48,7 @@ const LoginPage = () => {
         console.log("Login exitoso");
         alert("Bienvenido: " + data.message);
         // Redirigir al usuario a la página de inicio
-        window.location.href = "/";
+        //window.location.href = "/";
       } else {
         console.log("Fallo en el inicio de sesión");
         setErrorMessage(data.message || "Credenciales incorrectas");
