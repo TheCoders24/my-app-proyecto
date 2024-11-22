@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'; // Asegúrate de que bcrypt esté instalado
-import { query } from '../../lib/db'; // Importa tu función para consultas a la base de datos
+import { query } from './../../lib/db'; // Importa tu función para consultas a la base de datos
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
