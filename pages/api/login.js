@@ -38,7 +38,6 @@ export default async function handler(req, res) {
             const isValidPassword = await bcrypt.compare(password, user.password);
             console.log('Password match result:', isValidPassword);
 
-           
             // Login exitoso
             console.log('Login successful for user:', username);
             return res.status(200).json({ success: true, message: 'Login successful' });
