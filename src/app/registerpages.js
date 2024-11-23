@@ -48,7 +48,7 @@ const RegisterPage = () => {
       if (data.success) {
         console.log("Registro exitoso");
         setUserId(data.id); // Guardar el ID del nuevo usuario en el estado
-        alert("Usuario registrado con éxito. ID: " + data.id);
+        alert("Usuario registrado con éxito.");
         // Redirigir al usuario a la página de login, por ejemplo
         // window.location.href = "/login";
       } else {
