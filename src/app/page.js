@@ -9,6 +9,7 @@ import RegisterPage from "./registerpages";
 
 export default function Home() {
   return (
-    <RegisterPage/>
+    //<RegisterPage/>
+    <LoginPage/>
   );
 }
