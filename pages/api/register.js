@@ -32,18 +32,15 @@ export default async function handler(req, res) {
             const hashedPassword = await bcrypt.hash(password, 10);
 
             // Inserta el nuevo usuario en la base de datos
-            const insertResult = await query(
-                'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
+            await query(
+                'INSERT INTO users (username, password) VALUES ($1, $2)',
                 [username, hashedPassword]
             );
 
-            const userId = insertResult.rows[0].id; // Obtener el ID del usuario recién registrado
-
-            // Devuelve el ID del usuario como respuesta
+            // Devuelve un mensaje de éxito
             return res.status(201).json({
                 success: true,
                 message: 'User registered successfully',
-                id: userId, // Devuelve el ID del nuevo usuario
             });
         } catch (error) {
             console.error('Error during user registration:', error);
