@@ -21,6 +21,7 @@ export default async function handler(req, res) {
 
             // Verifica si el nombre de usuario ya está en uso
             const userCheckResult = await query('SELECT * FROM users WHERE username = $1', [username]);
+            console.log('User check result:', userCheckResult.rows);
 
             if (userCheckResult.rows.length > 0) {
                 return res
@@ -30,12 +31,14 @@ export default async function handler(req, res) {
 
             // Cifra la contraseña
             const hashedPassword = await bcrypt.hash(password, 10);
+            console.log('Hashed password:', hashedPassword);
 
             // Inserta el nuevo usuario en la base de datos
             await query(
                 'INSERT INTO users (username, password) VALUES ($1, $2)',
                 [username, hashedPassword]
             );
+            console.log('User inserted into database');
 
             // Devuelve un mensaje de éxito
             return res.status(201).json({
