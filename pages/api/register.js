@@ -10,8 +10,22 @@ export const config = {
 export default async function handler(req, res) {
     if (req.method === 'POST') {
         try {
+            console.log('Request body:', req.body);
             // Verifica que el cuerpo de la solicitud contenga los datos esperados
             const { username, password } = req.body;
+            console.log('Username:', username);
+            console.log('Password:', password);
+
+            if(username.length < 3){
+                return res
+                    .status(400)
+                    .json({ success: false, message: 'Username must be at least 3 characters long' });
+            }
+            if(password.length < 6){
+                return res
+                    .status(400)
+                    .json({ success: false, message: 'Password must be at least 6 characters long' });
+            }
 
             if (!username || !password) {
                 return res
