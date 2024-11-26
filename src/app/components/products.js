@@ -1,7 +1,7 @@
 "use client"; // Asegúrate de que esto esté en la parte superior
 
 import {  useEffect, useState } from 'react';
-import React, { useReducer } from 'react';
+import React from 'react';
 
 const ProductosPage = () => {
   const [productos, setProductos] = useState([]);
@@ -76,43 +76,80 @@ const ProductosPage = () => {
   };
 
   return (
-    <div>
-      <h1>Productos</h1>
-      <form onSubmit={agregarProducto}>
-        <input
-          type="text"
-          placeholder="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Descripción"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Precio"
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-          required
-        />
-        <input
-          type="number"
-          placeholder="Cantidad"
-          value={cantidad}
-          onChange={(e) => setCantidad(e.target.value)}
-          required
-        />
-        <button type="submit">Agregar Producto</button>
+    <div className="container mx-auto p-6 max-w-2xl">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Productos</h1>
+      
+      <form 
+        onSubmit={agregarProducto} 
+        className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-6"
+      >
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Nombre"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            required
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Descripción"
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        
+        <div className="mb-4 flex space-x-4">
+          <input
+            type="number"
+            placeholder="Precio"
+            value={precio}
+            onChange={(e) => setPrecio(e.target.value)}
+            required
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+          
+          <input
+            type="number"
+            placeholder="Cantidad"
+            value={cantidad}
+            onChange={(e) => setCantidad(e.target.value)}
+            required
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        
+        <button 
+          type="submit" 
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+        >
+          Agregar Producto
+        </button>
       </form>
-      <ul>
+      
+      <ul className="space-y-4">
         {productos.map((producto) => (
-          <li key={producto.id}>
-            {producto.nombre} - {producto.precio} - {producto.cantidad_en_stock}
-            <button onClick={() => eliminarProducto(producto.id)}>Eliminar</button>
+          <li 
+            key={producto.id} 
+            className="bg-white shadow rounded-lg p-4 flex justify-between items-center"
+          >
+            <div>
+              <span className="font-semibold">{producto.nombre}</span>
+              <span className="ml-4 text-gray-600">
+                Precio: ${producto.precio} - Stock: {producto.cantidad_en_stock}
+              </span>
+            </div>
+            <button 
+              onClick={() => eliminarProducto(producto.id)}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Eliminar
+            </button>
           </li>
         ))}
       </ul>
