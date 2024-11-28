@@ -4,13 +4,19 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 
 const ProductosPage = () => {
+  const [isClient, setIsClient] = useState(false);
   const [productos, setProductos] = useState([]);
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [precio, setPrecio] = useState('');
   const [cantidad, setCantidad] = useState('');
 
+  useEffect(() =>{
+    setIsClient(true);
+  }, []);
+
   useEffect(() => {
+    if (!isClient) return;
     const fetchProductos = async () => {
       try {
         const res = await fetch('/api/productos');
@@ -25,7 +31,7 @@ const ProductosPage = () => {
     };
 
     fetchProductos();
-  }, []);
+  }, [isClient]);
 
   const agregarProducto = async (e) => {
     e.preventDefault();
@@ -74,6 +80,10 @@ const ProductosPage = () => {
       console.error(error);
     }
   };
+
+  if(!isClient){
+    return null;
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
