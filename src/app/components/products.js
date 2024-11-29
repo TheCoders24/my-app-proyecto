@@ -25,6 +25,9 @@ const ProductosPage = () => {
         }
         const data = await res.json();
         setProductos(data);
+        console.log(data);
+        console.log(productos);
+        console.log(setProductos);
       } catch (error) {
         console.error(error);
       }
@@ -48,6 +51,7 @@ const ProductosPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(nuevoProducto),
+        
       });
       if (!res.ok) {
         throw new Error('Error al agregar el producto');
@@ -58,6 +62,9 @@ const ProductosPage = () => {
       setDescripcion('');
       setPrecio('');
       setCantidad('');
+      console.log(setProductos);
+      console.log(productos);
+      console.log(productoCreado);
     } catch (error) {
       console.error(error);
     }
@@ -76,6 +83,9 @@ const ProductosPage = () => {
         throw new Error('Error al eliminar el producto');
       }
       setProductos(productos.filter((producto) => producto.producto_id !== producto_id));
+      console.log(productos);
+      console.log(setProductos);
+      
     } catch (error) {
       console.error(error);
     }
