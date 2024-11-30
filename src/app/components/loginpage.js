@@ -7,7 +7,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Evitar que el formulario se recargue
+    event.preventDefault(); // Evitar que el formulario se  recargue
     setLoading(true);
     setErrorMessage("");
 
