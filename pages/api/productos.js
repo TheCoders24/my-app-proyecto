@@ -8,6 +8,7 @@ export default async function handler(req, res) {
             try {
                 const result = await query('SELECT * FROM producto ORDER BY producto_id DESC');
                 res.status(200).json(result.rows);
+                console.log("se ejecuto correctamente la consulta");
             } catch (error) {
                 console.error('Error al obtener productos:', error);
                 res.status(500).json({ error: 'Error al recuperar productos' });
@@ -31,6 +32,7 @@ export default async function handler(req, res) {
                 );
 
                 res.status(201).json(result.rows[0]);
+                console.log("se creo correctamente el producto");
             } catch (error) {
                 console.error('Error al crear producto:', error);
                 res.status(500).json({ error: 'Error al crear producto' });
@@ -61,6 +63,7 @@ export default async function handler(req, res) {
                 }
 
                 res.status(200).json(result.rows[0]);
+                console.log("se actualizo correctamente el producto");
             } catch (error) {
                 console.error('Error al actualizar producto:', error);
                 res.status(500).json({ error: 'Error al actualizar producto' });
@@ -89,6 +92,7 @@ export default async function handler(req, res) {
                     message: 'Producto eliminado exitosamente',
                     producto: result.rows[0]
                 });
+                console.log("se elimino correctamente el producto");
             } catch (error) {
                 console.error('Error al eliminar producto:', error);
                 res.status(500).json({ error: 'Error al eliminar producto' });
