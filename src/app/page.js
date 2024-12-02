@@ -5,6 +5,8 @@ import { appRouterContext } from "next/dist/server/route-modules/app-route/share
 import LoginPage from "./components/loginpage";
 import RegisterPage from "./components/registerpages";
 import Principal from "./components/principal";
+import { useRouter } from 'next/navigation';
+import { Router } from "next/router";
 
 export default function Home() {
   return (

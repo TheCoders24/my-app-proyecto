@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
+import { DashboardPage } from "./Dashboard";
 
 const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
@@ -50,7 +51,7 @@ const LoginPage = () => {
         console.log("Login exitoso");
         alert("Bienvenido: " + data.message);
         // Redirigir al usuario al dashboard
-        router.push("/dashboard"); // Cambia la ruta según tu configuración
+        router.push("/DashboardPage"); // Cambia la ruta según tu configuración
       } else {
         console.log("Fallo en el inicio de sesión");
         setErrorMessage(data.message || "Credenciales incorrectas");
