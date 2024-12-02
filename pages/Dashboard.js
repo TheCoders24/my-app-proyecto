@@ -1,10 +1,16 @@
 "use client";
 
 const { requestToBodyStream } = require("next/dist/server/body-streams");
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+
 
 const DashboardPage = () => {
     return(
-        <h1>DashboardPage</h1>
+    <div className="h-screen flex justify-center items-center">
+        <h1>Dashboard</h1>
+    </div>
     );
 };
 
