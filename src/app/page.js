@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import Landing from "./components/index";
 import ProductosPage from "./components/products";

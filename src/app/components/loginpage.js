@@ -1,13 +1,15 @@
-"use client";
+"use client"; // Asegúrate de que esto esté presente si estás usando componentes de cliente
 
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter(); // Hook para redireccionar
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Evitar que el formulario se  recargue
+    event.preventDefault(); // Evitar que el formulario se recargue
     setLoading(true);
     setErrorMessage("");
 
@@ -47,8 +49,8 @@ const LoginPage = () => {
       if (data.success) {
         console.log("Login exitoso");
         alert("Bienvenido: " + data.message);
-        // Redirigir al usuario a la página de inicio
-        //window.location.href = "/";
+        // Redirigir al usuario al dashboard
+        router.push("/dashboard"); // Cambia la ruta según tu configuración
       } else {
         console.log("Fallo en el inicio de sesión");
         setErrorMessage(data.message || "Credenciales incorrectas");
