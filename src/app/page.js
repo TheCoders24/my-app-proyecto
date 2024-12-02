@@ -9,9 +9,7 @@ import Principal from "./components/principal";
 
 export default function Home() {
   return (
-    //<RegisterPage/>
-    //<LoginPage/>
-    //<Principal/>
-    <ProductosPage/>
+    <Principal/>
+    //<ProductosPage/>
   );
 }
