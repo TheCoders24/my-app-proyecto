@@ -1,47 +1,42 @@
 "use client";
 
-const { requestToBodyStream } = require("next/dist/server/body-streams");
-import { defaultConfig } from 'next/dist/server/config-shared';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter } from "next/navigation";
 
+export default function DashboardPage() {
+  const router = useRouter();
 
-export default function DashboardPage(){
+  const sections = [
+    { name: "Usuarios", path: "/Crud/users" },
+    { name: "Productos", path: "/Crud/producto" },
+    { name: "Clientes", path: "/Crud/cliente" },
+    { name: "Ventas", path: "/Crud/venta" },
+    { name: "Detalle de Ventas", path: "/Crud/detalle_venta" },
+  ];
 
-    const [serverTime, setServerTime] = useState(null);
-    const [error, setError] = useState(null);
-    
-    useEffect(() =>{
-        // hacemos una llamada a la api para obtener la hora del servidor
-        async function FetchServerTime() {
-            try
-            {
-                const response = await fetch('/api/now');
-                if(!response.ok)
-                {
-                    throw new Error("Error al obtener la hora del servidor" + response.statusText);
-                }
-                const data = await response.json();
-                setServerTime(data.serverTime);
-            }
-            catch(error)
-            {
-                console.error(error.message);
-                setError("No se Puedo Obtener la Hora del Servidor");
-            }
-        }
-        FetchServerTime();
-    }, []); // solo se ejecuta una vez al cargar la página
-
-    return (
-        <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <h1 className="text-4xl font-bold text-blue-600 mb-6">Dashboard</h1>
-            {error && <p className="text-red-500 text-lg mb-4">{error}</p>}
-            {serverTime && (
-                <p className="absolute top-4 right-4 text-sm text-gray-700 bg-white shadow-md rounded px-4 py-2">
-                    Hora del servidor: <span className="font-semibold">{new Date(serverTime).toLocaleString()}</span>
-                </p>
-            )}
+  return (
+    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-extrabold text-center text-blue-600 mb-10">Dashboard</h1>
+        
+        {/* Container for the buttons */}
+        <div className="flex flex-wrap justify-center gap-6">
+          {sections.map((section) => (
+            <div key={section.path} className="flex justify-center">
+              <div className="w-full max-w-xs">
+                <button
+                  onClick={() => router.push(section.path)}
+                  className="w-full bg-blue-600 text-white font-semibold py-4 px-6 rounded-lg shadow-lg hover:bg-blue-500 transition duration-300 ease-in-out transform hover:scale-105"
+                >
+                  {section.name}
+                </button>
+                <div className="mt-2 text-center">
+                  <p className="text-blue-600">Accede a {section.name.toLowerCase()}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-    );
-}  
+      </div>
+    </div>
+  );
+}
