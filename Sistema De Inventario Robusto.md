@@ -1,10 +1,10 @@
-Aquí tienes todo el contenido anterior en formato **Markdown** para que puedas copiarlo y usarlo fácilmente en tu documentación o notas.
+Aquí tienes el contenido anterior adaptado para **PostgreSQL** en formato **Markdown**:
 
 ---
 
-# Sistema de Inventario Robusto
+# Sistema de Inventario Robusto (PostgreSQL)
 
-Este documento describe la estructura de la base de datos, procedimientos almacenados, triggers, vistas y la integración con un dashboard en **Next.js** para un sistema de inventario robusto.
+Este documento describe la estructura de la base de datos, procedimientos almacenados, triggers, vistas y la integración con un dashboard en **Next.js** para un sistema de inventario robusto utilizando **PostgreSQL**.
 
 ---
 
@@ -17,11 +17,11 @@ Almacena información de los usuarios del sistema.
 
 ```sql
 CREATE TABLE Usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    rol ENUM('admin', 'empleado') DEFAULT 'empleado',
+    rol VARCHAR(20) CHECK (rol IN ('admin', 'empleado')) DEFAULT 'empleado',
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -31,7 +31,7 @@ Clasifica los productos en categorías.
 
 ```sql
 CREATE TABLE Categorias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL
 );
 ```
@@ -41,7 +41,7 @@ Almacena información de los proveedores.
 
 ```sql
 CREATE TABLE Proveedores (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     contacto VARCHAR(100),
     telefono VARCHAR(20),
@@ -54,15 +54,13 @@ Almacena información de los productos en el inventario.
 
 ```sql
 CREATE TABLE Productos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     descripcion TEXT,
     precio DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL,
-    categoria_id INT,
-    proveedor_id INT,
-    FOREIGN KEY (categoria_id) REFERENCES Categorias(id),
-    FOREIGN KEY (proveedor_id) REFERENCES Proveedores(id)
+    categoria_id INT REFERENCES Categorias(id) ON DELETE SET NULL,
+    proveedor_id INT REFERENCES Proveedores(id) ON DELETE SET NULL
 );
 ```
 
@@ -71,14 +69,12 @@ Registra los movimientos de inventario (entradas, salidas, ajustes).
 
 ```sql
 CREATE TABLE Movimientos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    producto_id INT NOT NULL,
-    tipo ENUM('entrada', 'salida', 'ajuste') NOT NULL,
+    id SERIAL PRIMARY KEY,
+    producto_id INT NOT NULL REFERENCES Productos(id) ON DELETE CASCADE,
+    tipo VARCHAR(20) CHECK (tipo IN ('entrada', 'salida', 'ajuste')) NOT NULL,
     cantidad INT NOT NULL,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    usuario_id INT,
-    FOREIGN KEY (producto_id) REFERENCES Productos(id),
-    FOREIGN KEY (usuario_id) REFERENCES Usuarios(id)
+    usuario_id INT REFERENCES Usuarios(id) ON DELETE SET NULL
 );
 ```
 
@@ -87,11 +83,10 @@ Registra las ventas de productos.
 
 ```sql
 CREATE TABLE Ventas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10, 2) NOT NULL,
-    usuario_id INT,
-    FOREIGN KEY (usuario_id) REFERENCES Usuarios(id)
+    usuario_id INT REFERENCES Usuarios(id) ON DELETE SET NULL
 );
 ```
 
@@ -100,13 +95,11 @@ Almacena los detalles de cada venta (productos vendidos).
 
 ```sql
 CREATE TABLE Detalle_Ventas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    venta_id INT NOT NULL,
-    producto_id INT NOT NULL,
+    id SERIAL PRIMARY KEY,
+    venta_id INT NOT NULL REFERENCES Ventas(id) ON DELETE CASCADE,
+    producto_id INT NOT NULL REFERENCES Productos(id) ON DELETE CASCADE,
     cantidad INT NOT NULL,
-    precio DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (venta_id) REFERENCES Ventas(id),
-    FOREIGN KEY (producto_id) REFERENCES Productos(id)
+    precio DECIMAL(10, 2) NOT NULL
 );
 ```
 
@@ -117,32 +110,32 @@ CREATE TABLE Detalle_Ventas (
 ### **Registrar un nuevo producto**
 
 ```sql
-DELIMITER //
-CREATE PROCEDURE RegistrarProducto(
-    IN p_nombre VARCHAR(100),
-    IN p_descripcion TEXT,
-    IN p_precio DECIMAL(10, 2),
-    IN p_stock INT,
-    IN p_categoria_id INT,
-    IN p_proveedor_id INT
+CREATE OR REPLACE FUNCTION RegistrarProducto(
+    p_nombre VARCHAR(100),
+    p_descripcion TEXT,
+    p_precio DECIMAL(10, 2),
+    p_stock INT,
+    p_categoria_id INT,
+    p_proveedor_id INT
 )
+RETURNS VOID AS $$
 BEGIN
     INSERT INTO Productos (nombre, descripcion, precio, stock, categoria_id, proveedor_id)
     VALUES (p_nombre, p_descripcion, p_precio, p_stock, p_categoria_id, p_proveedor_id);
-END //
-DELIMITER ;
+END;
+$$ LANGUAGE plpgsql;
 ```
 
 ### **Registrar un movimiento de inventario**
 
 ```sql
-DELIMITER //
-CREATE PROCEDURE RegistrarMovimiento(
-    IN p_producto_id INT,
-    IN p_tipo ENUM('entrada', 'salida', 'ajuste'),
-    IN p_cantidad INT,
-    IN p_usuario_id INT
+CREATE OR REPLACE FUNCTION RegistrarMovimiento(
+    p_producto_id INT,
+    p_tipo VARCHAR(20),
+    p_cantidad INT,
+    p_usuario_id INT
 )
+RETURNS VOID AS $$
 BEGIN
     -- Registrar el movimiento
     INSERT INTO Movimientos (producto_id, tipo, cantidad, usuario_id)
@@ -151,11 +144,11 @@ BEGIN
     -- Actualizar el stock del producto
     IF p_tipo = 'entrada' THEN
         UPDATE Productos SET stock = stock + p_cantidad WHERE id = p_producto_id;
-    ELSEIF p_tipo = 'salida' THEN
+    ELSIF p_tipo = 'salida' THEN
         UPDATE Productos SET stock = stock - p_cantidad WHERE id = p_producto_id;
     END IF;
-END //
-DELIMITER ;
+END;
+$$ LANGUAGE plpgsql;
 ```
 
 ---
@@ -165,33 +158,42 @@ DELIMITER ;
 ### **Actualizar stock después de una venta**
 
 ```sql
-DELIMITER //
-CREATE TRIGGER ActualizarStockDespuesVenta
-AFTER INSERT ON Detalle_Ventas
-FOR EACH ROW
+CREATE OR REPLACE FUNCTION ActualizarStockDespuesVenta()
+RETURNS TRIGGER AS $$
 BEGIN
     UPDATE Productos
     SET stock = stock - NEW.cantidad
     WHERE id = NEW.producto_id;
-END //
-DELIMITER ;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER Trigger_ActualizarStockDespuesVenta
+AFTER INSERT ON Detalle_Ventas
+FOR EACH ROW
+EXECUTE FUNCTION ActualizarStockDespuesVenta();
 ```
 
 ### **Verificar stock antes de una venta**
 
 ```sql
-DELIMITER //
-CREATE TRIGGER VerificarStockAntesVenta
-BEFORE INSERT ON Detalle_Ventas
-FOR EACH ROW
+CREATE OR REPLACE FUNCTION VerificarStockAntesVenta()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_stock INT;
 BEGIN
-    DECLARE v_stock INT;
     SELECT stock INTO v_stock FROM Productos WHERE id = NEW.producto_id;
     IF v_stock < NEW.cantidad THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock insuficiente';
+        RAISE EXCEPTION 'Stock insuficiente';
     END IF;
-END //
-DELIMITER ;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER Trigger_VerificarStockAntesVenta
+BEFORE INSERT ON Detalle_Ventas
+FOR EACH ROW
+EXECUTE FUNCTION VerificarStockAntesVenta();
 ```
 
 ---
@@ -250,7 +252,7 @@ JOIN Usuarios u ON m.usuario_id = u.id;
 3. **Ventas totales por mes**:
    ```sql
    SELECT 
-       DATE_FORMAT(fecha, '%Y-%m') AS mes,
+       TO_CHAR(fecha, 'YYYY-MM') AS mes,
        SUM(total) AS ventas_totales
    FROM Ventas
    GROUP BY mes;
@@ -260,9 +262,13 @@ JOIN Usuarios u ON m.usuario_id = u.id;
    ```sql
    SELECT * FROM Vista_Movimientos ORDER BY fecha DESC LIMIT 10;
    ```
+
 ---
 
 ## **Conclusión**
 
-Este diseño de base de datos y las funcionalidades avanzadas (procedimientos almacenados, triggers, vistas) proporcionan una base sólida para un **sistema de inventario robusto**.
+Este diseño de base de datos y las funcionalidades avanzadas (procedimientos almacenados, triggers, vistas) proporcionan una base sólida para un **sistema de inventario robusto** en **PostgreSQL**. Además, la integración con Next.js permite crear un **dashboard** dinámico y funcional. Puedes expandir este sistema agregando más características, como reportes, notificaciones de stock bajo, y más. ¡Espero que esto te sea útil! 😊
+
 --- 
+
+**Nota**: Copia este contenido en un archivo `.md` para usarlo en tu documentación.

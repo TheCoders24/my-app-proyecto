@@ -1,46 +1,55 @@
-
--- Crear tabla de Usuarios
-CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-);
-
--- Crear tabla de Productos
-CREATE TABLE producto (
-    producto_id SERIAL PRIMARY KEY,
+CREATE TABLE Usuarios (
+    id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    descripcion VARCHAR(255),
-    precio NUMERIC(10, 2) NOT NULL,
-    cantidad_en_inventario INT NOT NULL
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    rol VARCHAR(20) CHECK (rol IN ('admin', 'empleado')) DEFAULT 'empleado',
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Crear tabla de Clientes
-CREATE TABLE cliente (
-    cliente_id SERIAL PRIMARY KEY,
+CREATE TABLE Categorias (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Proveedores (
+    id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
-    telefono VARCHAR(15)
+    contacto VARCHAR(100),
+    telefono VARCHAR(20),
+    email VARCHAR(100)
 );
 
--- Crear tabla de Ventas
-CREATE TABLE venta (
-    venta_id SERIAL PRIMARY KEY,
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    cliente_id INT,
-    user_id INT,
-    FOREIGN KEY (cliente_id) REFERENCES cliente(cliente_id) ON DELETE SET NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+CREATE TABLE Productos (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
+    categoria_id INT REFERENCES Categorias(id) ON DELETE SET NULL,
+    proveedor_id INT REFERENCES Proveedores(id) ON DELETE SET NULL
 );
 
--- Crear tabla de Detalle de Venta
-CREATE TABLE detalle_venta (
-    detalle_venta_id SERIAL PRIMARY KEY,
-    venta_id INT,
-    producto_id INT,
+CREATE TABLE Movimientos (
+    id SERIAL PRIMARY KEY,
+    producto_id INT NOT NULL REFERENCES Productos(id) ON DELETE CASCADE,
+    tipo VARCHAR(20) CHECK (tipo IN ('entrada', 'salida', 'ajuste')) NOT NULL,
     cantidad INT NOT NULL,
-    precio_unitario NUMERIC(10, 2) NOT NULL,
-    subtotal NUMERIC(10, 2) GENERATED ALWAYS AS (cantidad * precio_unitario) STORED,
-    FOREIGN KEY (venta_id) REFERENCES venta(venta_id) ON DELETE CASCADE,
-    FOREIGN KEY (producto_id) REFERENCES producto(producto_id) ON DELETE CASCADE
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_id INT REFERENCES Usuarios(id) ON DELETE SET NULL
+);
+
+CREATE TABLE Ventas (
+    id SERIAL PRIMARY KEY,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total DECIMAL(10, 2) NOT NULL,
+    usuario_id INT REFERENCES Usuarios(id) ON DELETE SET NULL
+);
+
+CREATE TABLE Detalle_Ventas (
+    id SERIAL PRIMARY KEY,
+    venta_id INT NOT NULL REFERENCES Ventas(id) ON DELETE CASCADE,
+    producto_id INT NOT NULL REFERENCES Productos(id) ON DELETE CASCADE,
+    cantidad INT NOT NULL,
+    precio DECIMAL(10, 2) NOT NULL
 );
