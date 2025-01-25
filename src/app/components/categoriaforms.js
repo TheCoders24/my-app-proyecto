@@ -30,8 +30,9 @@ export default function FormularioCategoria({ onClose = () => {} }) { // Valor p
       if (!response.ok) {
         throw new Error(data.error || 'Error al crear la categoría');
       }
-
+      setError('Categoria registrada con exito')
       onClose(true); // Cerrar modal y actualizar lista
+      router.push('/dashboard');
       
     } catch (error) {
       console.error('Error al crear categoría:', error);

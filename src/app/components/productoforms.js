@@ -39,7 +39,7 @@ export default function FormularioProducto() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Error al registrar el producto');
       }
-      alert('Producto registrado con éxito');
+      setError('Producto registrado con éxito');
       router.push('/dashboard');
     } catch (error) {
       console.error('Error:', error);

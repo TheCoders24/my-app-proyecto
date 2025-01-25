@@ -48,8 +48,9 @@ export default function FormularioProveedor({ onClose = () => {} }) { // Valor p
       if (!response.ok) {
         throw new Error(data.error || 'Error al registrar el proveedor');
       }
-
+     setError('Proveedores registrado con exito');
       onClose(true); // Cierra el modal y actualiza datos
+      router.push('/dashboard');
 
     } catch (error) {
       console.error('Error:', error);
