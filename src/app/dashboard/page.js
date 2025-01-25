@@ -6,6 +6,7 @@ import FormMovimiento from '../components/movimientoforms';
 import FormVenta from '../components/ventaforms';
 import FormularioCategoria from "../components/categoriaforms";
 import FormularioProveedor from "../components/proveedoresforms";
+import StockChart from '../components/StockChart';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -14,20 +15,38 @@ export default function Dashboard() {
     totalSales: 0,
     recentMovements: [],
     loading: true,
-    error: null
+    error: null,
   });
 
   const [showModal, setShowModal] = useState(null);
   const router = useRouter();
 
+  // Datos de ejemplo para el gráfico
+  const stockData = {
+    labels: ['Producto A', 'Producto B', 'Producto C', 'Producto D'],
+    values: [20, 35, 15, 50],
+  };
+
   // Cargar datos iniciales
   const fetchDashboardData = async () => {
     try {
       const [productsRes, lowStockRes, salesRes, movementsRes] = await Promise.all([
-        fetch('/api/stats/products').then(res => res.json()),
-        fetch('/api/stats/low-stock').then(res => res.json()),
-        fetch('/api/stats/sales').then(res => res.json()),
-        fetch('/api/movements/recent').then(res => res.json())
+        fetch('/api/stats/products').then(res => {
+          if (!res.ok) throw new Error('Error al obtener productos');
+          return res.json();
+        }),
+        fetch('/api/stats/low-stock').then(res => {
+          if (!res.ok) throw new Error('Error al obtener productos con stock bajo');
+          return res.json();
+        }),
+        fetch('/api/stats/sales').then(res => {
+          if (!res.ok) throw new Error('Error al obtener ventas');
+          return res.json();
+        }),
+        fetch('/api/movements/recent/route').then(res => {
+          if (!res.ok) throw new Error('Error al obtener movimientos recientes');
+          return res.json();
+        }),
       ]);
 
       setStats({
@@ -36,14 +55,14 @@ export default function Dashboard() {
         totalSales: salesRes.total || 0,
         recentMovements: movementsRes.data || [],
         loading: false,
-        error: null
+        error: null,
       });
     } catch (error) {
       console.error("Error fetching data:", error);
       setStats(prev => ({
         ...prev,
         loading: false,
-        error: "Error al cargar los datos"
+        error: error.message || "Error al cargar los datos",
       }));
     }
   };
@@ -109,14 +128,14 @@ export default function Dashboard() {
             + Nuevo Producto
           </button>
           <button
-            onClick={() => setShowModal('Categoria')}  // Nuevo botón agregado
+            onClick={() => setShowModal('Categoria')}
             className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
           >
             + Nueva Categoría
           </button>
           <button
-          onClick={() => setShowModal('proveedor')}
-          className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700"
+            onClick={() => setShowModal('proveedor')}
+            className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700"
           >
             + Nuevo Proveedor
           </button>
@@ -203,8 +222,8 @@ export default function Dashboard() {
 
         <div className="bg-white p-6 rounded-xl shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Distribución de Stock</h2>
-          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
-            Gráfico de Barras (Integrar Chart.js aquí)
+          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+            <StockChart data={stockData} />
           </div>
         </div>
       </div>

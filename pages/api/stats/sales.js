@@ -1,9 +1,9 @@
 // pages/api/stats/sales.js
-import { pool } from '../../../lib/db';
+import { query } from "../../../lib/db";
 
 export default async function handler(req, res) {
   try {
-    const { rows } = await pool.query(`
+    const { rows } = await query(`
       SELECT SUM(total) as total 
       FROM ventas 
       WHERE fecha >= NOW() - INTERVAL '30 DAYS'
