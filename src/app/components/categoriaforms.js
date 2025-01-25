@@ -1,28 +1,27 @@
 "use client";
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
-export default function FormularioCategoria() {
-  const router = useRouter();
+export default function FormularioCategoria({ onClose }) {
   const [nombre, setNombre] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Resetear errores
-    
-    if (!nombre.trim()) {
-      setError('El nombre de la categoría es obligatorio');
-      return;
-    }
+    setError('');
+    setIsSubmitting(true);
 
     try {
+      if (!nombre.trim()) {
+        throw new Error('El nombre de la categoría es obligatorio');
+      }
+
       const response = await fetch('/api/categorias/nuevo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nombre }),
+        body: JSON.stringify({ nombre: nombre.trim() }),
       });
 
       const data = await response.json();
@@ -31,59 +30,72 @@ export default function FormularioCategoria() {
         throw new Error(data.error || 'Error al crear la categoría');
       }
 
-      router.push('/dashboard');
-
+      onClose(true); // Cerrar modal y actualizar lista
+      
     } catch (error) {
       console.error('Error al crear categoría:', error);
       setError(error.message || 'Ocurrió un error al guardar la categoría');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Nueva Categoría</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-md w-full bg-white rounded-lg shadow-xl">
+      <div className="flex justify-between items-center p-4 border-b">
+        <h2 className="text-xl font-bold text-gray-800">Nueva Categoría</h2>
+        <button
+          onClick={() => onClose()}
+          className="text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="p-6">
         {error && (
-          <div className="p-3 bg-red-100 text-red-700 rounded-md">
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
             {error}
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre de la categoría*
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Nombre de la categoría *
           </label>
           <input
             type="text"
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             value={nombre}
             onChange={(e) => {
               setNombre(e.target.value);
-              setError(''); // Limpiar error al escribir
+              setError('');
             }}
             placeholder="Ej. Electrónica"
             maxLength={100}
+            autoFocus
           />
-          <p className="text-xs text-gray-500 mt-1">Máximo 100 caracteres</p>
+          <p className="mt-1 text-xs text-gray-500">Máximo 100 caracteres</p>
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
           <button
             type="button"
-            onClick={() => router.push('/dashboard')}
+            onClick={() => onClose()}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            disabled={isSubmitting}
           >
             Cancelar
           </button>
           
           <button
             type="submit"
-            className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
-            disabled={!nombre.trim()} // Deshabilitar si está vacío
+            className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            disabled={isSubmitting || !nombre.trim()}
           >
-            Crear Categoría
+            {isSubmitting ? 'Creando...' : 'Crear Categoría'}
           </button>
         </div>
       </form>
