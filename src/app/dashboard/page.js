@@ -1,0 +1,156 @@
+"use client";
+import { useState, useEffect } from "react";
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    lowStock: 0,
+    totalSales: 0,
+    recentMovements: []
+  });
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsRes, lowStockRes, salesRes, movementsRes] = await Promise.all([
+          fetch('/api/stats/products').then(res => res.json()),
+          fetch('/api/stats/low-stock').then(res => res.json()),
+          fetch('/api/stats/sales').then(res => res.json()),
+          fetch('/api/movements/recent').then(res => res.json())
+        ]);
+
+        setStats({
+          totalProducts: productsRes.total || 0,
+          lowStock: lowStockRes.count || 0,
+          totalSales: salesRes.total || 0,
+          recentMovements: movementsRes.data || [],
+          loading: false,
+          error: null
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setStats(prev => ({
+          ...prev,
+          loading: false,
+          error: "Error al cargar los datos"
+        }));
+      }
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-8">
+      {/* Header y Botones de Acción */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Panel de Inventario</h1>
+        <div className="space-x-4">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            + Nuevo Producto
+          </button>
+          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+            Registrar Movimiento
+          </button>
+          <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+            Nueva Venta
+          </button>
+        </div>
+      </div>
+
+      {/* Tarjetas de Resumen */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <h3 className="text-gray-500 text-sm mb-2">Productos en Inventario</h3>
+          <p className="text-3xl font-bold text-blue-600">{stats.totalProducts}</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <h3 className="text-gray-500 text-sm mb-2">Productos con Stock Bajo</h3>
+          <p className="text-3xl font-bold text-red-600">{stats.lowStock}</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <h3 className="text-gray-500 text-sm mb-2">Ventas (30 días)</h3>
+          <p className="text-3xl font-bold text-green-600">${stats.totalSales.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* Gráficos y Tablas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Movimientos Recientes */}
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Movimientos Recientes</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left text-gray-600 border-b">
+                  <th className="pb-3">Producto</th>
+                  <th className="pb-3">Tipo</th>
+                  <th className="pb-3">Cantidad</th>
+                  <th className="pb-3">Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.recentMovements.map((mov, index) => (
+                  <tr key={index} className="border-b last:border-b-0">
+                    <td className="py-3">{mov.producto}</td>
+                    <td className="py-3">
+                      <span className={`px-2 py-1 rounded-full text-sm ${
+                        mov.tipo === 'entrada' ? 'bg-green-100 text-green-800' : 
+                        mov.tipo === 'salida' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {mov.tipo}
+                      </span>
+                    </td>
+                    <td className="py-3">{mov.cantidad}</td>
+                    <td className="py-3 text-gray-500">{new Date(mov.fecha).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Stock por Categoría (Placeholder para gráfico) */}
+        <div className="bg-white p-6 rounded-xl shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Distribución de Stock</h2>
+          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
+            Gráfico de Barras (Integrar Chart.js aquí)
+          </div>
+        </div>
+      </div>
+
+      {/* Sección de Acciones Rápidas */}
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <div className="text-center">
+            <div className="text-blue-600 text-2xl mb-2">🔄</div>
+            <span className="text-gray-600">Ajustar Inventario</span>
+          </div>
+        </button>
+        
+        <button className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <div className="text-center">
+            <div className="text-green-600 text-2xl mb-2">📦</div>
+            <span className="text-gray-600">Entrada Rápida</span>
+          </div>
+        </button>
+        
+        <button className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <div className="text-center">
+            <div className="text-red-600 text-2xl mb-2">📤</div>
+            <span className="text-gray-600">Salida Rápida</span>
+          </div>
+        </button>
+        
+        <button className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <div className="text-center">
+            <div className="text-purple-600 text-2xl mb-2">📊</div>
+            <span className="text-gray-600">Generar Reporte</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}
