@@ -1,44 +1,98 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
+import FormProducto from '../components/productoforms';
+import FormMovimiento from '../components/movimientoforms';
+import FormVenta from '../components/ventaforms';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStock: 0,
     totalSales: 0,
-    recentMovements: []
+    recentMovements: [],
+    loading: true,
+    error: null
   });
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productsRes, lowStockRes, salesRes, movementsRes] = await Promise.all([
-          fetch('/api/stats/products').then(res => res.json()),
-          fetch('/api/stats/low-stock').then(res => res.json()),
-          fetch('/api/stats/sales').then(res => res.json()),
-          fetch('/api/movements/recent').then(res => res.json())
-        ]);
+  const [showModal, setShowModal] = useState(null);
+  const router = useRouter();
 
-        setStats({
-          totalProducts: productsRes.total || 0,
-          lowStock: lowStockRes.count || 0,
-          totalSales: salesRes.total || 0,
-          recentMovements: movementsRes.data || [],
-          loading: false,
-          error: null
-        });
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setStats(prev => ({
-          ...prev,
-          loading: false,
-          error: "Error al cargar los datos"
-        }));
-      }
-    };
-    fetchData();
+  // Cargar datos iniciales
+  const fetchDashboardData = async () => {
+    try {
+      const [productsRes, lowStockRes, salesRes, movementsRes] = await Promise.all([
+        fetch('/api/stats/products').then(res => res.json()),
+        fetch('/api/stats/low-stock').then(res => res.json()),
+        fetch('/api/stats/sales').then(res => res.json()),
+        fetch('/api/movements/recent').then(res => res.json())
+      ]);
+
+      setStats({
+        totalProducts: productsRes.total || 0,
+        lowStock: lowStockRes.count || 0,
+        totalSales: salesRes.total || 0,
+        recentMovements: movementsRes.data || [],
+        loading: false,
+        error: null
+      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setStats(prev => ({
+        ...prev,
+        loading: false,
+        error: "Error al cargar los datos"
+      }));
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
   }, []);
+
+  // Manejar cierre de modal y actualizar datos
+  const handleModalClose = () => {
+    setShowModal(null);
+    fetchDashboardData();
+    router.refresh();
+  };
+
+  // Acciones rápidas
+  const handleQuickAction = async (action) => {
+    try {
+      const response = await fetch(`/api/quick/${action}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cantidad: 10 }),
+      });
+
+      if (response.ok) {
+        fetchDashboardData();
+      }
+    } catch (error) {
+      console.error("Error en acción rápida:", error);
+    }
+  };
+
+  if (stats.loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 p-8 flex items-center justify-center">
+        <div className="animate-pulse text-gray-500">Cargando datos...</div>
+      </div>
+    );
+  }
+
+  if (stats.error) {
+    return (
+      <div className="min-h-screen bg-gray-100 p-8 flex items-center justify-center">
+        <div className="text-red-500 p-4 bg-red-50 rounded-lg">
+          ⚠️ {stats.error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -46,17 +100,37 @@ export default function Dashboard() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Panel de Inventario</h1>
         <div className="space-x-4">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={() => setShowModal('producto')}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
             + Nuevo Producto
           </button>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+          <button 
+            onClick={() => setShowModal('movimiento')}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
             Registrar Movimiento
           </button>
-          <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+          <button 
+            onClick={() => setShowModal('venta')}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+          >
             Nueva Venta
           </button>
         </div>
       </div>
+
+      {/* Modales */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {showModal === 'producto' && <FormProducto onSuccess={handleModalClose} onCancel={handleModalClose} />}
+            {showModal === 'movimiento' && <FormMovimiento onSuccess={handleModalClose} onCancel={handleModalClose} />}
+            {showModal === 'venta' && <FormVenta onSuccess={handleModalClose} onCancel={handleModalClose} />}
+          </div>
+        </div>
+      )}
 
       {/* Tarjetas de Resumen */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -78,7 +152,6 @@ export default function Dashboard() {
 
       {/* Gráficos y Tablas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Movimientos Recientes */}
         <div className="bg-white p-6 rounded-xl shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Movimientos Recientes</h2>
           <div className="overflow-x-auto">
@@ -112,7 +185,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stock por Categoría (Placeholder para gráfico) */}
         <div className="bg-white p-6 rounded-xl shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Distribución de Stock</h2>
           <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
@@ -123,28 +195,40 @@ export default function Dashboard() {
 
       {/* Sección de Acciones Rápidas */}
       <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <button 
+          onClick={() => handleQuickAction('ajuste')}
+          className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+        >
           <div className="text-center">
             <div className="text-blue-600 text-2xl mb-2">🔄</div>
             <span className="text-gray-600">Ajustar Inventario</span>
           </div>
         </button>
         
-        <button className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <button 
+          onClick={() => handleQuickAction('entrada')}
+          className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+        >
           <div className="text-center">
             <div className="text-green-600 text-2xl mb-2">📦</div>
             <span className="text-gray-600">Entrada Rápida</span>
           </div>
         </button>
         
-        <button className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <button 
+          onClick={() => handleQuickAction('salida')}
+          className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+        >
           <div className="text-center">
             <div className="text-red-600 text-2xl mb-2">📤</div>
             <span className="text-gray-600">Salida Rápida</span>
           </div>
         </button>
         
-        <button className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <button 
+          onClick={() => window.print()}
+          className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+        >
           <div className="text-center">
             <div className="text-purple-600 text-2xl mb-2">📊</div>
             <span className="text-gray-600">Generar Reporte</span>
