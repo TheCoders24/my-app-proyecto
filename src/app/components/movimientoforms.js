@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react'; // Importa useEffect
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function FormularioMovimiento() {
@@ -11,24 +11,35 @@ export default function FormularioMovimiento() {
     usuario_id: ''
   });
   const [productos, setProductos] = useState([]); // Estado para almacenar los productos
+  const [usuarios, setUsuarios] = useState([]); // Estado para almacenar los usuarios
 
-  // Obtener la lista de productos al cargar el componente
+  // Obtener la lista de productos y usuarios al cargar el componente
   useEffect(() => {
-    const fetchProductos = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/productos/nuevo');
-        if (response.ok) {
-          const data = await response.json();
-          setProductos(data); // Guardar los productos en el estado
+        // Obtener productos
+        const responseProductos = await fetch('/api/productos/nuevo');
+        if (responseProductos.ok) {
+          const dataProductos = await responseProductos.json();
+          setProductos(dataProductos);
         } else {
           console.error('Error al obtener los productos');
+        }
+
+        // Obtener usuarios
+        const responseUsuarios = await fetch('/api/usuarios/usuarios');
+        if (responseUsuarios.ok) {
+          const dataUsuarios = await responseUsuarios.json();
+          setUsuarios(dataUsuarios);
+        } else {
+          console.error('Error al obtener los usuarios');
         }
       } catch (error) {
         console.error('Error:', error);
       }
     };
 
-    fetchProductos();
+    fetchData();
   }, []); // Ejecutar solo una vez al cargar el componente
 
   const handleSubmit = async (e) => {
@@ -98,16 +109,22 @@ export default function FormularioMovimiento() {
         />
       </div>
 
-      {/* Campo para el usuario */}
+      {/* Combobox para seleccionar el usuario */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Usuario</label>
-        <input
-          type="text"
+        <select
           required
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
           value={form.usuario_id}
           onChange={(e) => setForm({ ...form, usuario_id: e.target.value })}
-        />
+        >
+          <option value="">Seleccione un usuario</option>
+          {usuarios.map((usuario) => (
+            <option key={usuario.id} value={usuario.id}>
+              {usuario.nombre} ({usuario.email})
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Botón para enviar el formulario */}
