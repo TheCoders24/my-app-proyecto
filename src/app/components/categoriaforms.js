@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 
-export default function FormularioCategoria({ onClose }) {
+export default function FormularioCategoria({ onClose = () => {} }) { // Valor predeterminado añadido
   const [nombre, setNombre] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,8 +23,9 @@ export default function FormularioCategoria({ onClose }) {
         },
         body: JSON.stringify({ nombre: nombre.trim() }),
       });
-
+      console.log(nombre.toString());
       const data = await response.json();
+      console.log(data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Error al crear la categoría');
@@ -45,7 +46,7 @@ export default function FormularioCategoria({ onClose }) {
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-xl font-bold text-gray-800">Nueva Categoría</h2>
         <button
-          onClick={() => onClose()}
+          onClick={() => onClose()} // onClose es ahora una función garantizada
           className="text-gray-500 hover:text-gray-700 transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +84,7 @@ export default function FormularioCategoria({ onClose }) {
         <div className="flex justify-end gap-3 mt-6">
           <button
             type="button"
-            onClick={() => onClose()}
+            onClick={() => onClose()} // onClose es ahora una función garantizada
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             disabled={isSubmitting}
           >

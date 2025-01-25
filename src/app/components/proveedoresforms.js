@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 
-export default function FormularioProveedor({ onClose }) {
+export default function FormularioProveedor({ onClose = () => {} }) { // Valor predeterminado añadido
   const [form, setForm] = useState({
     nombre: '',
     contacto: '',
@@ -129,7 +129,7 @@ export default function FormularioProveedor({ onClose }) {
         <div className="flex justify-end gap-3 mt-6">
           <button
             type="button"
-            onClick={onClose} // Usar onClose directamente
+            onClick={onClose} // onClose ahora es una función garantizada
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             disabled={isSubmitting}
           >
