@@ -21,11 +21,12 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(null);
   const router = useRouter();
 
-  // Datos de ejemplo para el gráfico
-  const stockData = {
-    labels: ['Producto A', 'Producto B', 'Producto C', 'Producto D'],
-    values: [20, 35, 15, 50],
-  };
+  const [stockData, setStockData] = useState({ // Declara el estado stockData
+    labels: [], // Nombres de los productos
+    values: [], // Cantidades en stock
+  });
+  console.log(stockData)
+  console.log(setStockData)
 
   // Cargar datos iniciales
   const fetchDashboardData = async () => {
@@ -48,7 +49,19 @@ export default function Dashboard() {
           return res.json();
         }),
       ]);
-
+  
+      // Depuración: Verificar la respuesta de la API
+      console.log('Respuesta de la API de productos:', productsRes);
+  
+      // Verificar si productsRes.data existe antes de usar .map()
+      if (!productsRes.data) {
+        throw new Error('La respuesta de la API no contiene datos de productos');
+      }
+  
+      // Extraer nombres y stock de los productos
+      const productLabels = productsRes.data.map(product => product.nombre);
+      const productValues = productsRes.data.map(product => product.stock);
+  
       setStats({
         totalProducts: productsRes.total || 0,
         lowStock: lowStockRes.count || 0,
@@ -56,6 +69,12 @@ export default function Dashboard() {
         recentMovements: movementsRes.data || [],
         loading: false,
         error: null,
+      });
+  
+      // Actualizar los datos del gráfico
+      setStockData({
+        labels: productLabels,
+        values: productValues,
       });
     } catch (error) {
       console.error("Error fetching data:", error);
