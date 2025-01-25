@@ -114,6 +114,12 @@ export default function Dashboard() {
             + Nueva Categoría
           </button>
           <button
+          onClick={() => setShowModal('proveedor')}
+          className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700"
+          >
+            + Nuevo Proveedor
+          </button>
+          <button
             onClick={() => setShowModal('movimiento')}
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
@@ -135,6 +141,8 @@ export default function Dashboard() {
             {showModal === 'producto' && <FormProducto onSuccess={handleModalClose} onCancel={handleModalClose} />}
             {showModal === 'movimiento' && <FormMovimiento onSuccess={handleModalClose} onCancel={handleModalClose} />}
             {showModal === 'venta' && <FormVenta onSuccess={handleModalClose} onCancel={handleModalClose} />}
+            {showModal === 'proveedor' && <FormularioProveedor onSuccess={handleModalClose} onCancel={handleModalClose} />}
+            {showModal === 'Categoria' && <FormularioCategoria onSuccess={handleModalClose} onCancel={handleModalClose} />}
           </div>
         </div>
       )}
