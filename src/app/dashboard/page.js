@@ -5,6 +5,7 @@ import FormProducto from '../components/productoforms';
 import FormMovimiento from '../components/movimientoforms';
 import FormVenta from '../components/ventaforms';
 import FormularioCategoria from "../components/categoriaforms";
+import FormularioProveedor from "../components/proveedoresforms";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
