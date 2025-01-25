@@ -37,7 +37,6 @@ export default function FormularioProducto() {
       console.error('Error:', error);
     }
   };
-
   const handleClose = () => {
    router.push( "/dashboard");
   };
@@ -53,7 +52,6 @@ export default function FormularioProducto() {
           onChange={(e) => setForm({...form, nombre: e.target.value})}
         />
       </div>
-
       <div>
         <label className="block text-sm font-medium text-gray-700">Descripción</label>
         <textarea
@@ -62,7 +60,6 @@ export default function FormularioProducto() {
           onChange={(e) => setForm({...form, descripcion: e.target.value})}
         />
       </div>
-
       <div>
         <label className="block text-sm font-medium text-gray-700">Precio*</label>
         <input
@@ -75,7 +72,6 @@ export default function FormularioProducto() {
           onChange={(e) => setForm({...form, precio: e.target.value})}
         />
       </div>
-
       <div>
         <label className="block text-sm font-medium text-gray-700">Stock*</label>
         <input
@@ -87,7 +83,6 @@ export default function FormularioProducto() {
           onChange={(e) => setForm({...form, stock: e.target.value})}
         />
       </div>
-
       <div>
         <label className="block text-sm font-medium text-gray-700">Categoría ID*</label>
         <input
@@ -99,7 +94,6 @@ export default function FormularioProducto() {
           onChange={(e) => setForm({...form, categoria_id: e.target.value})}
         />
       </div>
-
       <div>
         <label className="block text-sm font-medium text-gray-700">Proveedor ID*</label>
         <input
@@ -111,7 +105,6 @@ export default function FormularioProducto() {
           onChange={(e) => setForm({...form, proveedor_id: e.target.value})}
         />
       </div>
-
       <div className="flex justify-between gap-4">
         <button
           type="button"
@@ -120,7 +113,6 @@ export default function FormularioProducto() {
         >
           Volver al Dashboard
         </button>
-        
         <button
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex-1"
