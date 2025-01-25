@@ -12,9 +12,14 @@ export default function FormularioProducto() {
     categoria_id: '',
     proveedor_id: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
     try {
       const response = await fetch('/api/productos/nuevo', {
         method: 'POST',
@@ -30,18 +35,30 @@ export default function FormularioProducto() {
         }),
       });
 
-      if (response.ok) {
-        router.push('/dashboard');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al registrar el producto');
       }
+      alert('Producto registrado con éxito');
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error:', error);
+      setError(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
   const handleClose = () => {
-   router.push( "/dashboard");
+    router.push("/dashboard");
   };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto p-4">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
       <div>
         <label className="block text-sm font-medium text-gray-700">Nombre*</label>
         <input
@@ -115,9 +132,10 @@ export default function FormularioProducto() {
         </button>
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex-1"
+          disabled={isSubmitting}
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex-1 disabled:bg-blue-300"
         >
-          Registrar Producto
+          {isSubmitting ? 'Registrando...' : 'Registrar Producto'}
         </button>
       </div>
     </form>
