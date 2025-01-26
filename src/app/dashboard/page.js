@@ -25,8 +25,7 @@ export default function Dashboard() {
     labels: [], // Nombres de los productos
     values: [], // Cantidades en stock
   });
-  console.log(stockData)
-  console.log(setStockData)
+ 
 
   // Cargar datos iniciales
   const fetchDashboardData = async () => {
@@ -200,7 +199,7 @@ export default function Dashboard() {
         
         <div className="bg-white p-6 rounded-xl shadow-sm">
           <h3 className="text-gray-500 text-sm mb-2">Ventas (30 días)</h3>
-          <p className="text-3xl font-bold text-green-600">${stats.totalSales.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-green-600">${stats.totalSales}</p>
         </div>
       </div>
 
