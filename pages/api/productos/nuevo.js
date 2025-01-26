@@ -55,7 +55,7 @@ export default async function handler(req, res) {
   // Manejar solicitudes GET
   else if (req.method === 'GET') {
     try {
-      const result = await query('SELECT id, nombre, stock FROM Productos');
+      const result = await query('SELECT id, nombre, stock, precio FROM Productos');
       res.status(200).json(result.rows);
     } catch (error) {
       console.error('Error al obtener los productos:', error);

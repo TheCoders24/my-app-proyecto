@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -7,7 +6,7 @@ export default function FormularioVenta() {
   const router = useRouter();
   const [venta, setVenta] = useState({
     usuario_id: '',
-    productos: [{ id: '', cantidad: 1, precio: 0 }] // Cambiar 0 por 1
+    productos: [{ id: '', cantidad: 1, precio: 0 }], // Inicializar con cantidad 1 y precio 0
   });
   const [productosDisponibles, setProductosDisponibles] = useState([]);
   const [usuariosDisponibles, setUsuariosDisponibles] = useState([]);
@@ -36,27 +35,31 @@ export default function FormularioVenta() {
   const addProducto = () => {
     setVenta({
       ...venta,
-      productos: [...venta.productos, { id: '', cantidad: 1, precio: 0 }]
+      productos: [...venta.productos, { id: '', cantidad: 1, precio: 0 }],
     });
   };
 
   // Manejar cambios en los campos del formulario
   const handleChange = (index, field, value) => {
     const nuevosProductos = [...venta.productos];
-
+  
     // Convertir a número si el campo es "cantidad"
     const parsedValue = field === 'cantidad' ? parseInt(value, 10) : value;
-
+  
     // Validar que parsedValue sea un número válido
     if (!isNaN(parsedValue)) {
       nuevosProductos[index][field] = parsedValue;
-
+  
       // Si el campo es "id", actualizar el precio automáticamente
       if (field === 'id') {
-        const productoSeleccionado = productosDisponibles.find(p => p.id === parsedValue);
-        nuevosProductos[index].precio = productoSeleccionado ? productoSeleccionado.precio : 0;
+        const productoSeleccionado = productosDisponibles.find(
+          (p) => p.id === parsedValue
+        );
+        nuevosProductos[index].precio = productoSeleccionado
+          ? productoSeleccionado.precio
+          : 0;
       }
-
+  
       setVenta({ ...venta, productos: nuevosProductos });
     }
   };
@@ -66,7 +69,10 @@ export default function FormularioVenta() {
     e.preventDefault();
     try {
       // Calcular el total de la venta
-      const total = venta.productos.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
+      const total = venta.productos.reduce(
+        (sum, p) => sum + p.precio * p.cantidad,
+        0
+      );
 
       // Enviar la solicitud al endpoint de la API
       const response = await fetch('/api/ventas/nueva', {
@@ -76,7 +82,7 @@ export default function FormularioVenta() {
         },
         body: JSON.stringify({
           ...venta,
-          total: total
+          total: total,
         }),
       });
 
