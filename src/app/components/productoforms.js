@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function FormularioProducto() {
@@ -48,8 +48,10 @@ export default function FormularioProducto() {
       setIsSubmitting(false);
     }
   };
+
   const handleClose = () => {
-    router.push("/dashboard");
+    router.push('/dashboard');
+    router.back();
   };
 
   return (
