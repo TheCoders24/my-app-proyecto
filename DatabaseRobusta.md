@@ -205,3 +205,278 @@ VALUES (1, 'entrada', 5, 1);
 4. **Escalabilidad**: Si el sistema crece, considera particionar tablas grandes (como `Movimientos` o `Auditoria`).
 
 Este diseño es robusto, seguro y escalable, listo para manejar un sistema de inventario en producción.
+
+
+
+Para hacer que la base de datos sea aún más robusta, escalable y preparada para un entorno de producción, puedes agregar las siguientes características y mejoras adicionales:
+
+---
+
+### **1. Tabla de Configuraciones**
+Una tabla para almacenar configuraciones globales del sistema, como tasas de impuestos, moneda predeterminada, límites de stock, etc.
+
+```sql
+CREATE TABLE Configuraciones (
+    id SERIAL PRIMARY KEY,
+    clave VARCHAR(100) NOT NULL UNIQUE,
+    valor TEXT NOT NULL,
+    descripcion TEXT
+);
+
+-- Ejemplo de datos iniciales
+INSERT INTO Configuraciones (clave, valor, descripcion)
+VALUES 
+    ('IVA', '16', 'Impuesto al Valor Agregado'),
+    ('MONEDA', 'USD', 'Moneda predeterminada del sistema');
+```
+
+---
+
+### **2. Tabla de Historial de Precios**
+Para rastrear cambios en los precios de los productos a lo largo del tiempo.
+
+```sql
+CREATE TABLE Historial_Precios (
+    id SERIAL PRIMARY KEY,
+    producto_id INT NOT NULL REFERENCES Productos(id) ON DELETE CASCADE,
+    precio_anterior DECIMAL(10, 2) NOT NULL,
+    precio_nuevo DECIMAL(10, 2) NOT NULL,
+    fecha_cambio TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    usuario_id INT REFERENCES Usuarios(id) ON DELETE SET NULL
+);
+
+-- Trigger para registrar cambios de precio
+CREATE OR REPLACE FUNCTION registrar_cambio_precio() RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.precio IS DISTINCT FROM NEW.precio THEN
+        INSERT INTO Historial_Precios (producto_id, precio_anterior, precio_nuevo, usuario_id)
+        VALUES (NEW.id, OLD.precio, NEW.precio, NEW.usuario_id);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_cambio_precio
+AFTER UPDATE ON Productos
+FOR EACH ROW
+EXECUTE FUNCTION registrar_cambio_precio();
+```
+
+---
+
+### **3. Tabla de Pedidos a Proveedores**
+Para gestionar pedidos de productos a proveedores.
+
+```sql
+CREATE TABLE Pedidos_Proveedores (
+    id SERIAL PRIMARY KEY,
+    proveedor_id INT NOT NULL REFERENCES Proveedores(id) ON DELETE CASCADE,
+    fecha_pedido TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    fecha_entrega TIMESTAMP WITH TIME ZONE,
+    estado VARCHAR(20) CHECK (estado IN ('pendiente', 'en_camino', 'recibido', 'cancelado')) DEFAULT 'pendiente',
+    total DECIMAL(10, 2) NOT NULL CHECK (total >= 0),
+    usuario_id INT REFERENCES Usuarios(id) ON DELETE SET NULL
+);
+
+CREATE TABLE Detalle_Pedidos_Proveedores (
+    id SERIAL PRIMARY KEY,
+    pedido_id INT NOT NULL REFERENCES Pedidos_Proveedores(id) ON DELETE CASCADE,
+    producto_id INT NOT NULL REFERENCES Productos(id) ON DELETE CASCADE,
+    cantidad INT NOT NULL CHECK (cantidad > 0),
+    precio DECIMAL(10, 2) NOT NULL CHECK (precio >= 0)
+);
+```
+
+---
+
+### **4. Tabla de Devoluciones**
+Para gestionar devoluciones de productos vendidos.
+
+```sql
+CREATE TABLE Devoluciones (
+    id SERIAL PRIMARY KEY,
+    venta_id INT NOT NULL REFERENCES Ventas(id) ON DELETE CASCADE,
+    fecha TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    motivo TEXT,
+    usuario_id INT REFERENCES Usuarios(id) ON DELETE SET NULL
+);
+
+CREATE TABLE Detalle_Devoluciones (
+    id SERIAL PRIMARY KEY,
+    devolucion_id INT NOT NULL REFERENCES Devoluciones(id) ON DELETE CASCADE,
+    producto_id INT NOT NULL REFERENCES Productos(id) ON DELETE CASCADE,
+    cantidad INT NOT NULL CHECK (cantidad > 0),
+    precio DECIMAL(10, 2) NOT NULL CHECK (precio >= 0)
+);
+```
+
+---
+
+### **5. Tabla de Notificaciones**
+Para enviar notificaciones a los usuarios (por ejemplo, alertas de stock bajo).
+
+```sql
+CREATE TABLE Notificaciones (
+    id SERIAL PRIMARY KEY,
+    usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+    mensaje TEXT NOT NULL,
+    leida BOOLEAN DEFAULT FALSE,
+    fecha TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+### **6. Tabla de Sesiones de Usuarios**
+Para rastrear las sesiones de los usuarios y mejorar la seguridad.
+
+```sql
+CREATE TABLE Sesiones (
+    id SERIAL PRIMARY KEY,
+    usuario_id INT NOT NULL REFERENCES Usuarios(id) ON DELETE CASCADE,
+    token VARCHAR(512) NOT NULL,
+    fecha_inicio TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    fecha_fin TIMESTAMP WITH TIME ZONE,
+    activa BOOLEAN DEFAULT TRUE
+);
+```
+
+---
+
+### **7. Tabla de Métricas y Reportes**
+Para almacenar métricas y datos analíticos, como ventas por día, productos más vendidos, etc.
+
+```sql
+CREATE TABLE Metricas (
+    id SERIAL PRIMARY KEY,
+    tipo_metrica VARCHAR(50) NOT NULL,
+    valor TEXT NOT NULL,
+    fecha TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+### **8. Mejoras en la Seguridad**
+- **Contraseñas encriptadas**: Asegúrate de que las contraseñas se almacenen encriptadas (usando bcrypt o similar).
+- **Tokens de autenticación**: Usa tokens JWT para autenticación y autorización.
+- **Restricciones de acceso**: Define roles y permisos para limitar el acceso a ciertas tablas o funciones.
+
+---
+
+### **9. Particionamiento de Tablas**
+Para tablas grandes como `Movimientos`, `Auditoria` o `Ventas`, considera el particionamiento por fechas para mejorar el rendimiento.
+
+```sql
+-- Ejemplo de particionamiento para la tabla Movimientos
+CREATE TABLE Movimientos_2023 (
+    CHECK (fecha >= '2023-01-01' AND fecha < '2024-01-01')
+) INHERITS (Movimientos);
+
+CREATE TABLE Movimientos_2024 (
+    CHECK (fecha >= '2024-01-01' AND fecha < '2025-01-01')
+) INHERITS (Movimientos);
+```
+
+---
+
+### **10. Integración con APIs Externas**
+- **Facturación electrónica**: Agrega una tabla para almacenar datos de facturación electrónica si es necesario.
+- **Sincronización con otros sistemas**: Crea tablas para almacenar datos de sincronización con sistemas externos (por ejemplo, ERP o CRM).
+
+---
+
+### **11. Mejoras en la Usabilidad**
+- **Búsquedas avanzadas**: Agrega índices de texto completo para búsquedas más eficientes en campos como `nombre` o `descripcion`.
+- **Exportación de datos**: Crea vistas o procedimientos almacenados para facilitar la exportación de datos en formatos como CSV o JSON.
+
+---
+
+### **12. Ejemplo de Vista para Reportes**
+Crea vistas para facilitar la generación de reportes.
+
+```sql
+CREATE VIEW Reporte_Ventas AS
+SELECT 
+    V.id AS venta_id,
+    V.fecha,
+    V.total,
+    U.nombre AS usuario,
+    JSON_AGG(
+        JSON_BUILD_OBJECT(
+            'producto', P.nombre,
+            'cantidad', DV.cantidad,
+            'precio', DV.precio
+        )
+    ) AS productos
+FROM Ventas V
+JOIN Usuarios U ON V.usuario_id = U.id
+JOIN Detalle_Ventas DV ON V.id = DV.venta_id
+JOIN Productos P ON DV.producto_id = P.id
+GROUP BY V.id, V.fecha, V.total, U.nombre;
+```
+
+---
+
+### **13. Ejemplo de Procedimiento Almacenado**
+Un procedimiento almacenado para realizar una venta y actualizar el stock.
+
+```sql
+CREATE OR REPLACE FUNCTION realizar_venta(
+    p_usuario_id INT,
+    p_productos JSON
+) RETURNS INT AS $$
+DECLARE
+    v_venta_id INT;
+    v_total DECIMAL(10, 2) := 0;
+    v_producto JSON;
+BEGIN
+    -- Crear la venta
+    INSERT INTO Ventas (total, usuario_id) VALUES (0, p_usuario_id)
+    RETURNING id INTO v_venta_id;
+
+    -- Procesar cada producto
+    FOR v_producto IN SELECT * FROM json_array_elements(p_productos) LOOP
+        INSERT INTO Detalle_Ventas (venta_id, producto_id, cantidad, precio)
+        VALUES (
+            v_venta_id,
+            (v_producto->>'producto_id')::INT,
+            (v_producto->>'cantidad')::INT,
+            (SELECT precio FROM Productos WHERE id = (v_producto->>'producto_id')::INT)
+        );
+
+        -- Actualizar el total
+        v_total := v_total + ((v_producto->>'cantidad')::INT * (SELECT precio FROM Productos WHERE id = (v_producto->>'producto_id')::INT));
+
+        -- Actualizar el stock
+        UPDATE Productos SET stock = stock - (v_producto->>'cantidad')::INT
+        WHERE id = (v_producto->>'producto_id')::INT;
+    END LOOP;
+
+    -- Actualizar el total de la venta
+    UPDATE Ventas SET total = v_total WHERE id = v_venta_id;
+
+    RETURN v_venta_id;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+---
+
+### **14. Documentación y Comentarios**
+Agrega comentarios a las tablas y columnas para facilitar el mantenimiento.
+
+```sql
+COMMENT ON TABLE Usuarios IS 'Tabla que almacena la información de los usuarios del sistema.';
+COMMENT ON COLUMN Usuarios.password IS 'Contraseña encriptada del usuario.';
+```
+
+---
+
+### **15. Pruebas y Validaciones**
+- **Pruebas unitarias**: Crea pruebas unitarias para los procedimientos almacenados y triggers.
+- **Validaciones de datos**: Asegúrate de que todas las entradas de datos sean validadas antes de ser insertadas en la base de datos.
+
+---
+
+Con estas mejoras adicionales, tu base de datos estará lista para manejar un sistema de inventario complejo, seguro y escalable en un entorno de producción.
