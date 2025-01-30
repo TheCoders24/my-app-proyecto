@@ -1,5 +1,6 @@
 import { query } from "../../../lib/db";
-import bcrypt from "bcrypt"; // Para comparar contraseñas hasheadas
+import bcrypt from "bcrypt";
+import validator from "validator"; // Librería para validar datos
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -7,6 +8,15 @@ export default async function handler(req, res) {
   }
 
   const { email, password } = req.body;
+
+  // Validación de entrada
+  if (!email || !password) {
+    return res.status(400).json({ message: "Todos los campos son obligatorios" });
+  }
+
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ message: "El email no es válido" });
+  }
 
   try {
     // Buscar el usuario en la base de datos
@@ -30,6 +40,6 @@ export default async function handler(req, res) {
     res.status(200).json({ message: "Autenticación exitosa", rol: user.rows[0].rol });
   } catch (error) {
     console.error("Error en la autenticación:", error);
-    res.status(500).json({ message: "Error en el servidor" });
+    res.status(500).json({ message: "Error en el servidor" }); // No devuelvas detalles del error
   }
 }
