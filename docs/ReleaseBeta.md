@@ -1,7 +1,4 @@
-¡Qué buena iniciativa! Mejorar este proyecto y convertirlo en algo más robusto es una excelente manera de aprender desarrollo web y prepararte para oportunidades laborales. Aquí te doy algunas ideas y sugerencias para que puedas llevar este proyecto al siguiente nivel, tanto en términos de funcionalidad como de aprendizaje:
-
 ---
-
 ### **1. Implementación del Backend**
 Ya que tienes las interfaces listas, el siguiente paso es implementar el backend correctamente. Aquí te dejo algunas recomendaciones:
 
