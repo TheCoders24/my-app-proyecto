@@ -38,18 +38,24 @@ export default function FormularioVenta() {
       productos: [...venta.productos, { id: '', cantidad: 1, precio: 0 }],
     });
   };
-
+  // Calcular el total para un productos especifico
+  const calcularTotal = (producto) => {
+    const producto = venta.productos.find((producto) => producto.id === id);
+    if (producto) {
+      const total = producto.cantidad * producto.precio;
+      return total;
+    }
   // Manejar cambios en los campos del formulario
   const handleChange = (index, field, value) => {
     const nuevosProductos = [...venta.productos];
-  
-    // Convertir a número si el campo es "cantidad"
-    const parsedValue = field === 'cantidad' ? parseInt(value, 10) : value;
-  
+
+    // Convertir a número si el campo es "cantidad" o "precio"
+    const parsedValue = field === 'cantidad' || field === 'precio' ? parseFloat(value) : value;
+
     // Validar que parsedValue sea un número válido
     if (!isNaN(parsedValue)) {
       nuevosProductos[index][field] = parsedValue;
-  
+
       // Si el campo es "id", actualizar el precio automáticamente
       if (field === 'id') {
         const productoSeleccionado = productosDisponibles.find(
@@ -59,7 +65,7 @@ export default function FormularioVenta() {
           ? productoSeleccionado.precio
           : 0;
       }
-  
+
       setVenta({ ...venta, productos: nuevosProductos });
     }
   };
@@ -149,14 +155,14 @@ export default function FormularioVenta() {
             />
           </div>
 
-          {/* Campo para el precio (solo lectura) */}
+          {/* Campo para el precio (modificable) */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Precio Unitario</label>
             <input
               type="number"
-              readOnly
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border bg-gray-100"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
               value={producto.precio || 0} // Valor predeterminado para evitar NaN
+              onChange={(e) => handleChange(index, 'precio', e.target.value)}
             />
           </div>
         </div>
@@ -180,4 +186,5 @@ export default function FormularioVenta() {
       </button>
     </form>
   );
+}
 }
