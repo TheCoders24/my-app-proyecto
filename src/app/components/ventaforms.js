@@ -38,13 +38,6 @@ export default function FormularioVenta() {
       productos: [...venta.productos, { id: '', cantidad: 1, precio: 0 }],
     });
   };
-  // Calcular el total para un productos especifico
-  const calcularTotal = (producto) => {
-    const producto = venta.productos.find((producto) => producto.id === id);
-    if (producto) {
-      const total = producto.cantidad * producto.precio;
-      return total;
-    }
   // Manejar cambios en los campos del formulario
   const handleChange = (index, field, value) => {
     const nuevosProductos = [...venta.productos];
@@ -186,5 +179,4 @@ export default function FormularioVenta() {
       </button>
     </form>
   );
-}
 }
