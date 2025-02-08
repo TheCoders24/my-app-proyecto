@@ -5,7 +5,7 @@ import { query } from '../../../lib/db';
 export default async function handler(req, res) {
   try {
     // Obtener los nombres y el stock de cada producto
-    const { rows } = await query('SELECT nombre, stock FROM productos');
+    const { rows } = await query('SELECT nombre, stock FROM productos WHERE stock > 0 ORDER BY stock DESC');
     
     // Calcular el total de stock
     const total = rows.reduce((sum, product) => sum + product.stock, 0);

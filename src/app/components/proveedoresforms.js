@@ -1,7 +1,11 @@
 "use client";
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function FormularioProveedor({ onClose = () => {} }) { // Valor predeterminado añadido
+  const router = useRouter();
+  const [success, setSuccess] = useState('');
+
   const [form, setForm] = useState({
     nombre: '',
     contacto: '',
@@ -45,15 +49,18 @@ export default function FormularioProveedor({ onClose = () => {} }) { // Valor p
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al registrar el proveedor');
+      if (response.ok) {
+        alert('Proveedor Registrado con Exit');
+        console.log('Proveedor Registrado con Exito');
+        setSuccess('Proveedor Registrado con exito');
+        setTimeout(() => {
+          onClose();
+          router.push('/dashboard');
+        }, 1500);
       }
-     setError('Proveedores registrado con exito');
-      onClose(true); // Cierra el modal y actualiza datos
-      router.push('/dashboard');
-
     } catch (error) {
       console.error('Error:', error);
+      alert("Error al Registrar el Producto");
       setError(error.message);
     } finally {
       setIsSubmitting(false);
@@ -130,7 +137,7 @@ export default function FormularioProveedor({ onClose = () => {} }) { // Valor p
         <div className="flex justify-end gap-3 mt-6">
           <button
             type="button"
-            onClick={onClose} // onClose ahora es una función garantizada
+            onClick={() => router.push('/dashboard')} // onClose ahora es una función garantizada
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             disabled={isSubmitting}
           >
