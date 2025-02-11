@@ -1,4 +1,4 @@
-Aquí tienes una versión actualizada y robusta de tu base de datos de inventario, incorporando las mejoras sugeridas y asegurando un diseño sólido, escalable y seguro:
+versión actualizada y robusta de tu base de datos de inventario,  asegurando un diseño sólido, escalable y seguro:
 
 ---
 
@@ -353,6 +353,15 @@ CREATE TABLE Metricas (
     valor TEXT NOT NULL,
     fecha TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE RegistroActividad (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    ip VARCHAR(45) NOT NULL,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    accion VARCHAR(50) NOT NULL
+);
+
 ```
 
 ---
