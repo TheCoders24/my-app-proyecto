@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import FormProducto from '../components/productoforms';
@@ -9,7 +10,6 @@ import FormularioProveedor from "../components/proveedoresforms";
 import StockChart from '../components/StockChart';
 
 export default function Dashboard() {
-
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStock: 0,
@@ -20,49 +20,62 @@ export default function Dashboard() {
   });
 
   const [showModal, setShowModal] = useState(null);
- 
   const router = useRouter();
 
-  const [stockData, setStockData] = useState({ // Declara el estado stockData
+  const [stockData, setStockData] = useState({
     labels: [], // Nombres de los productos
     values: [], // Cantidades en stock
   });
- 
 
   // Cargar datos iniciales
   const fetchDashboardData = async () => {
     try {
+      const token = localStorage.getItem(process.env.JWT_SECRET); // Recupera el token
+
       const [productsRes, lowStockRes, salesRes, movementsRes] = await Promise.all([
-        fetch('/api/stats/products').then(res => {
+        fetch('/api/stats/products', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Envía el token en el encabezado
+          },
+        }).then(res => {
           if (!res.ok) throw new Error('Error al obtener productos');
           return res.json();
         }),
-        fetch('/api/stats/low-stock').then(res => {
+        fetch('/api/stats/low-stock', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Envía el token en el encabezado
+          },
+        }).then(res => {
           if (!res.ok) throw new Error('Error al obtener productos con stock bajo');
           return res.json();
         }),
-        fetch('/api/stats/sales').then(res => {
+        fetch('/api/stats/sales', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Envía el token en el encabezado
+          },
+        }).then(res => {
           if (!res.ok) throw new Error('Error al obtener ventas');
           return res.json();
         }),
-        fetch('/api/movements/recent/route').then(res => {
+        fetch('/api/movements/recent/route', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Envía el token en el encabezado
+          },
+        }).then(res => {
           if (!res.ok) throw new Error('Error al obtener movimientos recientes');
           return res.json();
         }),
       ]);
-  
-      // Depuración: Verificar la respuesta de la API
-      console.log('Respuesta de la API de productos:', productsRes);
-  
+
       // Verificar si productsRes.data existe antes de usar .map()
       if (!productsRes.data) {
         throw new Error('La respuesta de la API no contiene datos de productos');
       }
-  
+
       // Extraer nombres y stock de los productos
       const productLabels = productsRes.data.map(product => product.nombre);
       const productValues = productsRes.data.map(product => product.stock);
-  
+
       setStats({
         totalProducts: productsRes.total || 0,
         lowStock: lowStockRes.count || 0,
@@ -71,7 +84,7 @@ export default function Dashboard() {
         loading: false,
         error: null,
       });
-  
+
       // Actualizar los datos del gráfico
       setStockData({
         labels: productLabels,
@@ -88,17 +101,20 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem(process.env.JWT_SECRET); // Recupera el token con la clave correcta
 
-    fetchDashboardData();
-
-    // Verificamos si el token exite en el localstorage
-    const token = localStorage.getItem("token");
-
-    if(!token){
-      router.push("/login");
+    if (!token) {
+      router.push("/login"); // Redirige al login si no hay token
+    } else {
+      fetchDashboardData(); // Si hay token, carga los datos del dashboard
     }
-
   }, [router]);
+
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem(process.env.JWT_SECRET); // Elimina el token
+    router.push("/login"); // Redirige al login
+  };
 
   // Manejar cierre de modal y actualizar datos
   const handleModalClose = () => {
@@ -110,10 +126,13 @@ export default function Dashboard() {
   // Acciones rápidas
   const handleQuickAction = async (action) => {
     try {
+      const token = localStorage.getItem(process.env.JWT_SECRET); // Recupera el token
+
       const response = await fetch(`/api/quick/${action}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Envía el token en el encabezado
         },
         body: JSON.stringify({ cantidad: 10 }),
       });
@@ -179,6 +198,13 @@ export default function Dashboard() {
             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
           >
             Nueva Venta
+          </button>
+          {/* Botón de Salir */}
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Salir
           </button>
         </div>
       </div>

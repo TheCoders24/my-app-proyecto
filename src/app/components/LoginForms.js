@@ -22,31 +22,29 @@ export default function LoginForm() {
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
-        // Mensaje superior
+        // Mensaje de éxito
         setSuccess("¡Autenticación exitosa! Redirigiendo...");
         setError("");
-        
-        // Almacenamos el token en localstorage o cookies si es mas seguro 
-        localStorage.setItem("Token", data.token);
 
-        setSuccess("Autenticacion exitosa! Redirigiendo...");
-        setError("");
-        
+        // Almacenar el token en localStorage
+        localStorage.setItem(process.env.JWT_SECRET, data.token);
+        console.log(data.token);
         // Notificación Toast
         toast.success("Bienvenido");
-        
+
         // Redirección con delay
         setTimeout(() => router.push("/dashboard"), 1500);
-        
       } else {
+        // Mostrar error específico del servidor
         setError(data.message || "Error al iniciar sesión");
-        toast.error("Credenciales incorrectas"); // Notificación Toast
+        toast.error(data.message || "Credenciales incorrectas");
       }
     } catch (error) {
+      // Manejar errores de conexión
       setError("Error de conexión con el servidor");
-      toast.error("Error de conexión"); // Notificación Toast
+      toast.error("Error de conexión");
     }
   };
 
@@ -66,7 +64,7 @@ export default function LoginForm() {
 
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
-        
+
         {/* Mensaje de éxito */}
         {success && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -92,7 +90,7 @@ export default function LoginForm() {
               required
             />
           </div>
-          
+
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700">Contraseña</label>
             <input
@@ -103,7 +101,7 @@ export default function LoginForm() {
               required
             />
           </div>
-          
+
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"

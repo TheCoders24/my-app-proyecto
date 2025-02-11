@@ -1,0 +1,32 @@
+// middlewares/authMiddleware.js
+
+import jwt, { decode } from "jsonwebtoken"; // importamos la librerias de jsonwebtoken
+
+export default function authMiddleware(handler){
+    return async(req, res) => {
+        //Extraemos el token del encabezado " Authorization"
+        const token = req.headers.authorization?.split(" ")[1];
+        
+        console.log(token);
+
+        if(!token){
+            // Devolemos un mensaje con un estado de codigo 401 y con un mensaje de no autorizado
+            return res.status(401).json({ message: "No autorizado: Token no Proporcionado"});
+        }
+        
+        try{
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+            console.log(decoded);
+
+            // Agregamos el usuario decodificado al objeto "Req" para usaro en la API
+            req.user = decoded;
+
+
+            // Continuamos con la logica de la api
+            return handler(req,res)
+        }catch(error){
+            return res.status(401).json({ message: "No Autorizado: Token Invalido o Expirado"});
+        }
+    };
+}
