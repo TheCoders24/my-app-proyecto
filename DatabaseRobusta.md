@@ -1,7 +1,6 @@
 versión actualizada y robusta de tu base de datos de inventario,  asegurando un diseño sólido, escalable y seguro:
 
 ---
-
 ### **Esquema de la Base de Datos Actualizado**
 
 ```sql
