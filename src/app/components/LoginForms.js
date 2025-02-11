@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast"; // Importar para notificaciones
@@ -25,6 +26,12 @@ export default function LoginForm() {
       if (response.ok) {
         // Mensaje superior
         setSuccess("¡Autenticación exitosa! Redirigiendo...");
+        setError("");
+        
+        // Almacenamos el token en localstorage o cookies si es mas seguro 
+        localStorage.setItem("Token", data.token);
+
+        setSuccess("Autenticacion exitosa! Redirigiendo...");
         setError("");
         
         // Notificación Toast

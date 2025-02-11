@@ -9,6 +9,7 @@ import FormularioProveedor from "../components/proveedoresforms";
 import StockChart from '../components/StockChart';
 
 export default function Dashboard() {
+
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStock: 0,
@@ -19,6 +20,7 @@ export default function Dashboard() {
   });
 
   const [showModal, setShowModal] = useState(null);
+ 
   const router = useRouter();
 
   const [stockData, setStockData] = useState({ // Declara el estado stockData
@@ -86,8 +88,17 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+
     fetchDashboardData();
-  }, []);
+
+    // Verificamos si el token exite en el localstorage
+    const token = localStorage.getItem("token");
+
+    if(!token){
+      router.push("/login");
+    }
+
+  }, [router]);
 
   // Manejar cierre de modal y actualizar datos
   const handleModalClose = () => {
