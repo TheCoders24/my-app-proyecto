@@ -12,31 +12,43 @@ export default function LoginForm() {
   const router = useRouter();
 
   const handleLogin = async (e) => {
+    //Prevenir el comportamiento predeterminado del formulario
     e.preventDefault();
+    //Limpiar errores previos
+    setError("");
+    //Limpiar Mensaje de exitos previos
+    setSuccess("");
 
     try {
+      // Realizar la Solicitudes POST al backend para iniciar sesion
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
+      // Parsear la respuesta  JSON
       const data = await response.json();
 
       if (response.ok) {
         // Mensaje de éxito
+        // si la respuesta es  correcta nomas va a suceder lo siguiente
         setSuccess("¡Autenticación exitosa! Redirigiendo...");
-        setError("");
+        //Mostrar notificacion de exito
+        toast.success("Autenicacion exitos");
+
+        //Limpiar los campos de entrada despues de un inicio de sesion exitosa
+        setEmail();
+        setPassword();
 
         // Almacenar el token en localStorage
         localStorage.setItem(process.env.JWT_SECRET, data.token);
-        console.log(data.token);
-        // Notificación Toast
-        toast.success("Bienvenido");
 
         // Redirección con delay
         setTimeout(() => router.push("/dashboard"), 1500);
-      } else {
+      } 
+      else
+      {
         // Mostrar error específico del servidor
         setError(data.message || "Error al iniciar sesión");
         toast.error(data.message || "Credenciales incorrectas");
