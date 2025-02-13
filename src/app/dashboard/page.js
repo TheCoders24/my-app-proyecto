@@ -9,9 +9,11 @@ import FormularioCategoria from "../components/categoriaforms";
 import FormularioProveedor from "../components/proveedoresforms";
 import StockChart from '../components/StockChart';
 import ModalReportes from "../components/ModalReportes";
+import AjustarInventario from "../components/AjustarInventario";
 
 export default function Dashboard() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isAjustarInventarioOpen, setIsAjustarInventarioOpen] = useState(false);
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStock: 0,
@@ -36,7 +38,13 @@ export default function Dashboard() {
   const handleCloseReportModal = () => {
     setIsReportModalOpen(false);
   };
+  const handleOpenAjustarInventario = () => {
+    setIsAjustarInventarioOpen(true);
+  };
 
+  const handleCloseAjustarInventario = () => {
+    setIsAjustarInventarioOpen(false);
+  };
   // Cargar datos iniciales
   const fetchDashboardData = async () => {
     try {
@@ -295,7 +303,7 @@ export default function Dashboard() {
       {/* Sección de Acciones Rápidas */}
       <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
         <button 
-          onClick={() => handleQuickAction('ajuste')}
+          onClick={handleOpenAjustarInventario}
           className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
         >
           <div className="text-center">
@@ -303,6 +311,7 @@ export default function Dashboard() {
             <span className="text-gray-600">Ajustar Inventario</span>
           </div>
         </button>
+        <AjustarInventario onClose={handleCloseAjustarInventario}/>
         
         <button 
           onClick={() => handleQuickAction('entrada')}
