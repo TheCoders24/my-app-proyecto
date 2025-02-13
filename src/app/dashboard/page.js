@@ -120,7 +120,6 @@ export default function Dashboard() {
   const handleModalClose = () => {
     setShowModal(null);
     fetchDashboardData();
-    router.refresh();
   };
 
   // Acciones rápidas
