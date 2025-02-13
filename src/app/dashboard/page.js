@@ -8,8 +8,10 @@ import FormVenta from '../components/ventaforms';
 import FormularioCategoria from "../components/categoriaforms";
 import FormularioProveedor from "../components/proveedoresforms";
 import StockChart from '../components/StockChart';
+import ModalReportes from "../components/ModalReportes";
 
 export default function Dashboard() {
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStock: 0,
@@ -26,6 +28,14 @@ export default function Dashboard() {
     labels: [], // Nombres de los productos
     values: [], // Cantidades en stock
   });
+
+  const handleOpenReportModal = () => {
+    setIsReportModalOpen(true);
+  };
+  
+  const handleCloseReportModal = () => {
+    setIsReportModalOpen(false);
+  };
 
   // Cargar datos iniciales
   const fetchDashboardData = async () => {
@@ -315,7 +325,7 @@ export default function Dashboard() {
         </button>
         
         <button 
-          onClick={() => window.print()}
+          onClick={handleOpenReportModal}
           className="p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
         >
           <div className="text-center">
@@ -323,6 +333,7 @@ export default function Dashboard() {
             <span className="text-gray-600">Generar Reporte</span>
           </div>
         </button>
+        <ModalReportes isOpen={isReportModalOpen} onClose={handleCloseReportModal} />
       </div>
     </div>
   );
