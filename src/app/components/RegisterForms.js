@@ -9,7 +9,7 @@ export default function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [rol, setRol] = useState("empleado"); // Estado para el rol (por defecto "empleado")
+  const [rol, setRol] = useState(""); // Estado para el rol (por defecto "empleado")
   const [error, setError] = useState(""); // Estado para manejar errores
   const router = useRouter();
 
