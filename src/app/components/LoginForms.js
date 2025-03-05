@@ -10,11 +10,7 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(""); // Estado para mensaje de éxito
   const router = useRouter();
-
-
   const [isClient, setIsClient] = useState(false);
-
-
   useEffect(() =>{
     setIsClient(true);
   });
@@ -26,7 +22,6 @@ export default function LoginForm() {
     setError("");
     //Limpiar Mensaje de exitos previos
     setSuccess("");
-
     try {
       // Realizar la Solicitudes POST al backend para iniciar sesion
       const response = await fetch("/api/auth/login", {
@@ -37,9 +32,7 @@ export default function LoginForm() {
 
       // Parsear la respuesta  JSON
       const data = await response.json();
-
       console.log("Respuesta del Servidor:", data);
-      
 
       if (response.ok) {
         // Mensaje de éxito
@@ -47,18 +40,14 @@ export default function LoginForm() {
         setSuccess("¡Autenticación exitosa! Redirigiendo...");
         //Mostrar notificacion de exito
         toast.success("Autenicacion exitos");
-
         //Limpiar los campos de entrada despues de un inicio de sesion exitosa
-        setEmail();
-        setPassword();
-
+        setEmail('');
+        setPassword('');
         // Almacenar el token en localStorage
         localStorage.setItem(process.env.JWT_SECRET, data.token);
-        
         console.log("Token Almacenado en el LocalStorage", process.env.JWT_SECRET, data.token);
-
         // Redirección con delay
-        setTimeout(() => router.push("/dashboard"), 1500);
+        setTimeout(() => router.push("/dashboard"), 1000);
       } 
       else
       {

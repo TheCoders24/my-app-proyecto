@@ -54,7 +54,8 @@ export default function Dashboard() {
   // Cargar datos iniciales
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem(process.env.JWT_SECRET); // Recupera el token
+      const token = localStorage.getItem(process.env.NEXT_PUBLIC_JWT_SECRET);
+      //const token = localStorage.getItem(process.env.JWT_SECRET); // Recupera el token
 
       const [productsRes, lowStockRes, salesRes, movementsRes] = await Promise.all([
         fetch('/api/stats/products', {
