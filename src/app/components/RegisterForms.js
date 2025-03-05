@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { data } from "autoprefixer";
 
 export default function RegisterForm() {
   const [nombre, setNombre] = useState("");
@@ -33,7 +34,13 @@ export default function RegisterForm() {
       setError("Por favor, ingresa un email válido");
       return;
     }
-  
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+    if (!passwordRegex.test(password)) {
+      setError("La contraseña debe tener al menos 6 caracteres, incluyendo letras y números.");
+      return;
+    }
+
     try {
       // Enviar los datos del nuevo usuario al backend
       const response = await fetch("/api/auth/register", {
