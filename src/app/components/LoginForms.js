@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast"; // Importar para notificaciones
 
@@ -10,6 +10,14 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(""); // Estado para mensaje de éxito
   const router = useRouter();
+
+
+  const [isClient, setIsClient] = useState(false);
+
+
+  useEffect(() =>{
+    setIsClient(true);
+  });
 
   const handleLogin = async (e) => {
     //Prevenir el comportamiento predeterminado del formulario
@@ -30,6 +38,9 @@ export default function LoginForm() {
       // Parsear la respuesta  JSON
       const data = await response.json();
 
+      console.log("Respuesta del Servidor:", data);
+      
+
       if (response.ok) {
         // Mensaje de éxito
         // si la respuesta es  correcta nomas va a suceder lo siguiente
@@ -43,6 +54,8 @@ export default function LoginForm() {
 
         // Almacenar el token en localStorage
         localStorage.setItem(process.env.JWT_SECRET, data.token);
+        
+        console.log("Token Almacenado en el LocalStorage", process.env.JWT_SECRET, data.token);
 
         // Redirección con delay
         setTimeout(() => router.push("/dashboard"), 1500);

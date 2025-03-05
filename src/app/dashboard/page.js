@@ -9,11 +9,11 @@ import FormularioCategoria from "../components/categoriaforms";
 import FormularioProveedor from "../components/proveedoresforms";
 import StockChart from '../components/StockChart';
 import ModalReportes from "../components/ModalReportes";
-import AjustarInventario from "../components/AjustarInventario";
+import AjustarInventario from "../components/AjustarInventario"; // Importa el componente AjustarInventario
 
 export default function Dashboard() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [isAjustarInventarioOpen, setIsAjustarInventarioOpen] = useState(false);
+  const [isAjustarInventarioOpen, setIsAjustarInventarioOpen] = useState(false); // Estado para el modal de Ajustar Inventario
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStock: 0,
@@ -31,20 +31,26 @@ export default function Dashboard() {
     values: [], // Cantidades en stock
   });
 
+  // Abrir modal de reportes
   const handleOpenReportModal = () => {
     setIsReportModalOpen(true);
   };
-  
+
+  // Cerrar modal de reportes
   const handleCloseReportModal = () => {
     setIsReportModalOpen(false);
   };
+
+  // Abrir modal de Ajustar Inventario
   const handleOpenAjustarInventario = () => {
     setIsAjustarInventarioOpen(true);
   };
 
+  // Cerrar modal de Ajustar Inventario
   const handleCloseAjustarInventario = () => {
     setIsAjustarInventarioOpen(false);
   };
+
   // Cargar datos iniciales
   const fetchDashboardData = async () => {
     try {
@@ -120,13 +126,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem(process.env.JWT_SECRET); // Recupera el token con la clave correcta
-
+    
     if (!token) {
       router.push("/login"); // Redirige al login si no hay token
     } else {
       fetchDashboardData(); // Si hay token, carga los datos del dashboard
     }
-  }, [router]);
+  }, []);
 
   // Función para cerrar sesión
   const handleLogout = () => {
@@ -239,6 +245,15 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Modal de Ajustar Inventario */}
+      {isAjustarInventarioOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <AjustarInventario onClose={handleCloseAjustarInventario} />
+          </div>
+        </div>
+      )}
+
       {/* Tarjetas de Resumen */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -311,7 +326,6 @@ export default function Dashboard() {
             <span className="text-gray-600">Ajustar Inventario</span>
           </div>
         </button>
-        <AjustarInventario onClose={handleCloseAjustarInventario}/>
         
         <button 
           onClick={() => handleQuickAction('entrada')}

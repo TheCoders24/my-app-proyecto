@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function FormularioMovimiento() {
   const router = useRouter();
@@ -53,9 +54,15 @@ export default function FormularioMovimiento() {
         body: JSON.stringify(form),
       });
 
+      const data = await response.json();
+
+      console.log("Respuesta del Servidor", data);
+
       if (response.ok) {
+        toast.success("Se Registro Correctamente el Movimiento");
         router.push('/dashboard');
       } else {
+       toast.error("Error al Registrar el Movimiento");
         console.error('Error al registrar el movimiento');
       }
     } catch (error) {
