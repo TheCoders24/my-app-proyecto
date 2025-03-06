@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
@@ -52,7 +51,11 @@ export default function FormularioProducto() {
   };
 
   const handleClose = () => {
-    router.push('/dashboard'); // Eliminado el router.back() redundante
+    router.push('/dashboard');
+  };
+
+  const handleViewProducts = () => {
+    router.push('/dashboard/productos'); // Redirige a la página de listado de productos
   };
 
   return (
@@ -152,6 +155,17 @@ export default function FormularioProducto() {
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex-1 disabled:bg-blue-300 transition-colors"
           >
             {isSubmitting ? 'Registrando...' : 'Registrar Producto'}
+          </button>
+        </div>
+
+        {/* Botón para ver todos los productos */}
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={handleViewProducts}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 w-full transition-colors"
+          >
+            Ver Todos los Productos
           </button>
         </div>
       </form>
