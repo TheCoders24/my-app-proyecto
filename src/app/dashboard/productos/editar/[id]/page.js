@@ -16,12 +16,12 @@ export default function EditarProducto() {
   });
 
   useEffect(() => {
-    fetchProducto();
+    if (id) fetchProducto(); // Asegurar que `id` no sea undefined
   }, [id]);
 
   const fetchProducto = async () => {
     try {
-      const response = await fetch(`/api/productos/${id}`); // Obtener producto específico
+      const response = await fetch(`/api/productos/nuevo?id=${id}`);
       if (!response.ok) {
         throw new Error('Error al obtener el producto');
       }
@@ -29,26 +29,33 @@ export default function EditarProducto() {
       if (!data) {
         throw new Error('Producto no encontrado');
       }
-      setForm(data); // Actualizar el estado con los datos del producto
+      setForm(data);
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al cargar el producto');
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/api/productos`, {
+      const response = await fetch(`/api/productos/${id}`, { // Debe incluir `id` en la URL
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(id, ...form),
+        body: JSON.stringify(form), // Se corrige el formato del body
       });
+
       if (!response.ok) {
         throw new Error('Error al actualizar el producto');
       }
+
       toast.success('Producto actualizado con éxito');
       router.push('/dashboard/productos');
     } catch (error) {
@@ -62,7 +69,55 @@ export default function EditarProducto() {
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Editar Producto</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Campos del formulario (igual que en FormularioProducto) */}
+        <input
+          type="text"
+          name="nombre"
+          value={form.nombre}
+          onChange={handleChange}
+          placeholder="Nombre del producto"
+          className="w-full p-2 border rounded"
+        />
+        <input
+          type="text"
+          name="descripcion"
+          value={form.descripcion}
+          onChange={handleChange}
+          placeholder="Descripción"
+          className="w-full p-2 border rounded"
+        />
+        <input
+          type="number"
+          name="precio"
+          value={form.precio}
+          onChange={handleChange}
+          placeholder="Precio"
+          className="w-full p-2 border rounded"
+        />
+        <input
+          type="number"
+          name="stock"
+          value={form.stock}
+          onChange={handleChange}
+          placeholder="Stock"
+          className="w-full p-2 border rounded"
+        />
+        <input
+          type="text"
+          name="categoria_id"
+          value={form.categoria_id}
+          onChange={handleChange}
+          placeholder="ID de Categoría"
+          className="w-full p-2 border rounded"
+        />
+        <input
+          type="text"
+          name="proveedor_id"
+          value={form.proveedor_id}
+          onChange={handleChange}
+          placeholder="ID del Proveedor"
+          className="w-full p-2 border rounded"
+        />
+
         <div className="flex justify-between gap-4">
           <button
             type="button"

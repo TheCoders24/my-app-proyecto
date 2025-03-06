@@ -1,17 +1,14 @@
 import { query } from "../../../lib/db";
 
 export default async function handler(req, res) {
-  // Manejar solicitudes POST
+  // Manejar solicitudes POST (Crear producto)
   if (req.method === 'POST') {
-    // Extraer datos del cuerpo de la solicitud
     const { nombre, descripcion, precio, stock, categoria_id, proveedor_id } = req.body;
 
-    // Validación de campos obligatorios
     if (!nombre || precio === undefined || stock === undefined) {
       return res.status(400).json({ error: 'Los campos nombre, precio y stock son obligatorios' });
     }
 
-    // Validación de tipos de datos numéricos
     if (
       isNaN(parseFloat(precio)) ||
       isNaN(parseInt(stock, 10)) ||
@@ -22,7 +19,6 @@ export default async function handler(req, res) {
     }
 
     try {
-      // Ejecutar la consulta SQL
       const result = await query(
         `INSERT INTO Productos 
          (nombre, descripcion, precio, stock, categoria_id, proveedor_id) 
@@ -30,60 +26,106 @@ export default async function handler(req, res) {
          RETURNING *`,
         [
           nombre,
-          descripcion || null, // Si no se proporciona descripción, se inserta NULL
-          parseFloat(precio), // Convertir a número decimal
-          parseInt(stock, 10), // Convertir a número entero
-          categoria_id || null, // Si no se proporciona categoría_id, se inserta NULL
-          proveedor_id || null, // Si no se proporciona proveedor_id, se inserta NULL
+          descripcion || null,
+          parseFloat(precio),
+          parseInt(stock, 10),
+          categoria_id || null,
+          proveedor_id || null,
         ]
       );
 
-      // Verificar si se insertó correctamente
       if (result.rows.length === 0) {
         return res.status(500).json({ error: 'No se pudo insertar el producto' });
       }
 
-      // Responder con el producto insertado
       res.status(201).json(result.rows[0]);
     } catch (error) {
-      // Manejo de errores
       console.error('Error en la inserción del producto:', error);
       res.status(500).json({ error: 'Error interno del servidor', details: error.message });
     }
   }
 
-  // Manejar solicitudes GET
+  // Manejar solicitudes GET (Obtener productos o un solo producto)
   else if (req.method === 'GET') {
+    const { id } = req.query;
+
     try {
-      const result = await query('SELECT id, nombre, stock, precio FROM Productos');
-      res.status(200).json(result.rows);
+      if (id) {
+        // Obtener un solo producto por ID
+        const result = await query('SELECT * FROM Productos WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
+          return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+        return res.status(200).json(result.rows[0]);
+      } else {
+        // Obtener todos los productos
+        const result = await query('SELECT id, nombre, stock, precio FROM Productos');
+        return res.status(200).json(result.rows);
+      }
     } catch (error) {
       console.error('Error al obtener los productos:', error);
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   }
 
-  // Manejar solicitudes DELETE
-  else if (req.method === 'DELETE') {
-    const { id } = req.query; // Obtener el ID del producto desde los parámetros de la URL
+  // Manejar solicitudes PUT (Actualizar producto)
+  else if (req.method === 'PUT') {
+    const { id } = req.query;
+    const { nombre, descripcion, precio, stock, categoria_id, proveedor_id } = req.body;
 
-    // Validar que el ID esté presente y sea un número válido
+    if (!id || isNaN(parseInt(id, 10))) {
+      return res.status(400).json({ error: 'ID de producto no válido' });
+    }
+
+    if (!nombre || precio === undefined || stock === undefined) {
+      return res.status(400).json({ error: 'Los campos nombre, precio y stock son obligatorios' });
+    }
+
+    try {
+      const result = await query(
+        `UPDATE Productos 
+         SET nombre = $1, descripcion = $2, precio = $3, stock = $4, categoria_id = $5, proveedor_id = $6 
+         WHERE id = $7 
+         RETURNING *`,
+        [
+          nombre,
+          descripcion || null,
+          parseFloat(precio),
+          parseInt(stock, 10),
+          categoria_id || null,
+          proveedor_id || null,
+          parseInt(id, 10),
+        ]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+
+      res.status(200).json(result.rows[0]);
+    } catch (error) {
+      console.error('Error al actualizar el producto:', error);
+      res.status(500).json({ error: 'Error interno del servidor', details: error.message });
+    }
+  }
+
+  // Manejar solicitudes DELETE (Eliminar producto)
+  else if (req.method === 'DELETE') {
+    const { id } = req.query;
+
     if (!id || isNaN(parseInt(id, 10))) {
       return res.status(400).json({ error: 'ID de producto no válido' });
     }
 
     try {
-      // Ejecutar la consulta SQL para eliminar el producto
       const result = await query('DELETE FROM Productos WHERE id = $1 RETURNING *', [id]);
-      console.log(result)
-      // Verificar si se eliminó correctamente
+
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Producto no encontrado' });
       }
-      // Responder con el producto eliminado
+
       res.status(200).json({ success: true, deletedProduct: result.rows[0] });
     } catch (error) {
-      // Manejo de errores
       console.error('Error al eliminar el producto:', error);
       res.status(500).json({ error: 'Error interno del servidor', details: error.message });
     }
