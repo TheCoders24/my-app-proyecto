@@ -63,6 +63,32 @@ export default async function handler(req, res) {
     }
   }
 
+  // Manejar solicitudes DELETE
+  else if (req.method === 'DELETE') {
+    const { id } = req.query; // Obtener el ID del producto desde los parámetros de la URL
+
+    // Validar que el ID esté presente y sea un número válido
+    if (!id || isNaN(parseInt(id, 10))) {
+      return res.status(400).json({ error: 'ID de producto no válido' });
+    }
+
+    try {
+      // Ejecutar la consulta SQL para eliminar el producto
+      const result = await query('DELETE FROM Productos WHERE id = $1 RETURNING *', [id]);
+      console.log(result)
+      // Verificar si se eliminó correctamente
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+      // Responder con el producto eliminado
+      res.status(200).json({ success: true, deletedProduct: result.rows[0] });
+    } catch (error) {
+      // Manejo de errores
+      console.error('Error al eliminar el producto:', error);
+      res.status(500).json({ error: 'Error interno del servidor', details: error.message });
+    }
+  }
+
   // Manejar otros métodos HTTP
   else {
     res.status(405).json({ message: 'Método no permitido' });

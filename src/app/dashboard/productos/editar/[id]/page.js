@@ -21,17 +21,15 @@ export default function EditarProducto() {
 
   const fetchProducto = async () => {
     try {
-      const response = await fetch(`/api/productos`);
-        console.log(response.json)
-      if(response.json == null){
-        console.log("Error al obtener el fetch de productos");
-      }
+      const response = await fetch(`/api/productos/${id}`); // Obtener producto específico
       if (!response.ok) {
         throw new Error('Error al obtener el producto');
       }
       const data = await response.json();
-      console.log("Datos Recibidos" + data);
-      setForm(data);
+      if (!data) {
+        throw new Error('Producto no encontrado');
+      }
+      setForm(data); // Actualizar el estado con los datos del producto
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al cargar el producto');
@@ -46,7 +44,7 @@ export default function EditarProducto() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(id, ...form),
       });
       if (!response.ok) {
         throw new Error('Error al actualizar el producto');

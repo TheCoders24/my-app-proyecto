@@ -31,19 +31,26 @@ export default function ListadoProductos() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`/api/productos/${id}`, {
-        method: 'DELETE',
-      });
+      const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar este producto?');
+      if (!confirmDelete) return;
+  
+      const response = await fetch(`/api/productos/nuevo?id=${id}`, { method: 'DELETE' });
+  
       if (!response.ok) {
-        throw new Error('Error al eliminar el producto');
+        const errorData = await response.json(); // Intentar obtener detalles del error
+        throw new Error(errorData.message || 'Error al eliminar el producto');
       }
+  
       toast.success('Producto eliminado con éxito');
-      fetchProductos(); // Recargar la lista de productos
+  
+      // Si usas React con estado, podrías actualizarlo directamente sin recargar la lista
+      setProductos((prevProductos) => prevProductos.filter((producto) => producto.id !== id));
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al eliminar el producto');
+      toast.error(error.message || 'Error al eliminar el producto');
     }
   };
+  
 
   return (
     <div className="max-w-4xl mx-auto p-4">
