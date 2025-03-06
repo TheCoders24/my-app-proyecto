@@ -13,7 +13,7 @@ export default function ListadoProductos() {
 
   const fetchProductos = async () => {
     try {
-      const response = await fetch('/api/productos/page.js');
+      const response = await fetch('/api/productos/nuevo'); // Ruta corregida
       if (!response.ok) {
         throw new Error('Error al obtener los productos');
       }
