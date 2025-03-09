@@ -44,10 +44,10 @@ export default function LoginForm() {
         setEmail('');
         setPassword('');
         // Almacenar el token en localStorage
-        localStorage.setItem(process.env.JWT_SECRET, data.token);
+        sessionStorage.setItem(process.env.JWT_SECRET, data.token);
         console.log("Token Almacenado en el LocalStorage", process.env.JWT_SECRET, data.token);
         // Redirección con delay
-        setTimeout(() => router.push("/dashboard"), 1000);
+        setTimeout(() => router.push("/dashboard"), 10);
       } 
       else
       {
@@ -59,6 +59,29 @@ export default function LoginForm() {
       // Manejar errores de conexión
       setError("Error de conexión con el servidor");
       toast.error("Error de conexión");
+    }
+
+    //Limpiamos los campos de Email y Password
+    setEmail("");
+    setPassword("");
+
+    // Verificamos que ambos campos estan Validos
+    const userAuth = {
+      email,
+      password
+    };
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userAuth),
+      })
+    }catch(error){
+      setError("Error al Auth con el Servidor");
+      return;
     }
   };
 
