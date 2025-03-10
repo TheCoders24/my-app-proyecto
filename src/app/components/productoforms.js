@@ -36,7 +36,7 @@ export default function FormularioProducto() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al registrar el producto');
+        throw new Error(errorData.message || 'Error al registrar el producto'); 
       }
 
       toast.success('Producto registrado con éxito');
