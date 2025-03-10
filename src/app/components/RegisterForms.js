@@ -35,12 +35,7 @@ export default function RegisterForm() {
       return;
     }
 
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-    if (!passwordRegex.test(password)) {
-      setError("La contraseña debe tener al menos 6 caracteres, incluyendo letras y números.");
-      return;
-    }
-
+    
     try {
       // Enviar los datos del nuevo usuario al backend
       const response = await fetch("/api/auth/register", {

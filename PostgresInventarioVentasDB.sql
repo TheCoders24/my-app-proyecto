@@ -13,6 +13,10 @@ CREATE TABLE Usuarios (
     fecha_registro TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+--agregar a la tabla Usuarios 
+ALTER TABLE Usuarios
+ADD COLUMN usuario_id INTEGER;
+
 -- Tabla de relación Usuarios-Roles (para asignar múltiples roles a un usuario)
 CREATE TABLE Usuarios_Roles (
     usuario_id INT REFERENCES Usuarios(id) ON DELETE CASCADE,
